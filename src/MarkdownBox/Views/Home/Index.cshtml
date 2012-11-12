@@ -1,0 +1,27 @@
+﻿@{
+    //ViewBag.Title = "Index";
+}
+
+<div id="dropbox-login" style="display: none;">
+    You are not authorized yet.
+    <button>Dropbox Login</button>
+</div>
+
+<div id="directory-content" style="display: none;">
+    <button id="entries-refresh">Refresh</button>
+    <div id="entries"></div>
+</div>
+
+<div id="error-message"></div>
+
+<div id="wmd" style="display: none;">
+    <div class="wmd-panel">
+        <div id="wmd-button-bar"></div>
+        <textarea class="wmd-input" id="wmd-input"></textarea>
+    </div>
+    
+    <button id="save-button">Save</button>
+    <button id="reset-button">Reset</button>
+
+    <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+</div>

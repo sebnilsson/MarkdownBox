@@ -1,0 +1,89 @@
+﻿@using SquishIt.Framework
+@using SquishIt.Mvc
+
+@{
+    string siteText = "MarkdownBox";
+    string viewBagTitle = Convert.ToString(ViewBag.Title ?? string.Empty);
+    bool hasPrefixText = !string.IsNullOrWhiteSpace(viewBagTitle);
+
+    string pageTitle = (hasPrefixText) ? string.Format("{0} - {1}", viewBagTitle, siteText) : siteText;
+
+    string bodyClass = Convert.ToString(ViewBag.BodyClass);
+}
+
+@helper Css(string key) {
+  @Html.Raw(Bundle.Css().MvcRenderCachedAssetTag(key).ToString().ToLowerInvariant())
+}
+@helper Js(string key) {
+  @Html.Raw(Bundle.JavaScript().MvcRenderCachedAssetTag(key).ToString().ToLowerInvariant())
+}
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>@Html.Encode(pageTitle)</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    
+    <link rel="shortcut icon" href="~/favicon.ico">
+
+    @RenderSection("HeadContent", false)
+
+    @Js("bundled-head")
+
+    @Css("bundled-site")
+</head>
+<body class="@bodyClass">
+    <div id="message-box">
+        <!--[if lt IE 9]>
+            <div class="important">
+                <p>You are using an outdated browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this website.</p>
+            </div>
+        <![endif]-->
+        <noscript class="no-js">
+            <p><strong>This site will only work with Javascript</strong>. Please <a href="http://www.activatejavascript.org/">activate JavaScript</a>.</p>
+        </noscript>
+    </div>
+    
+    @*<header id="top">
+        MarkdownBox
+    </header>*@
+
+    <div id="main">
+        @RenderBody()
+    </div>
+
+    @*<footer id="footer">Copyright &#169; @DateTime.Today.Year Sebastian Nilsson</footer>*@
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.6.1/dropbox.min.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="@Url.Content("~/libraries/jquery-1.8.2.min.js")"><\/script>');
+        window.Dropbox || document.write('<script src="@Url.Content("~/libraries/dropbox.0.6.1.min.js")"><\/script>');
+
+        var basePath = '@Url.Content("~/")';
+    </script>
+        
+    @RenderSection("BottomScripts", false)
+    
+    @Js("bundled-site")
+    
+    @*<script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-36224162-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function () {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>*@
+</body>
+</html>
