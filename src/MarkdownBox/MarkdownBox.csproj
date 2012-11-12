@@ -148,10 +148,8 @@
     <Content Include="libraries\pagedown\Markdown.Sanitizer.js" />
     <Content Include="libraries\pagedown\Markdown.Editor.js" />
     <Content Include="libraries\pagedown\Markdown.Converter.js" />
+    <Content Include="libraries\pagedown\wmd-buttons.png" />
     <Content Include="Web.config" />
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
