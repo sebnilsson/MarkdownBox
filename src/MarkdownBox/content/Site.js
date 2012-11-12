@@ -69,12 +69,16 @@
             //});
             var $wmdHtml = $('#wmd-html');
             var $wmdInput = $('#wmd-input');
-            $wmdInput.on('change', function () {
-                $wmdHtml.html($wmdInput.val());
+            var $wmdPreview = $('#wmd-preview');
+            $wmdInput.on('keyup', function () {
+                $wmdHtml.val($wmdPreview.html());
             });
             
             $wmdHtml.click(function () {
                 $wmdHtml.select();
+            });
+            $wmdPreview.on('keyup', function (e) {
+                e.preventDefault();
             });
         },
         
@@ -173,10 +177,11 @@
                 markdownBox.setEntriesExpand();
 
                 $('#wmd-input').val(data).attr('data-path', path);
-                $('#wmd-preview').html('&nbsp;');
-                $('#wmd-html').val('');
+                var $wmdPreview = $('#wmd-preview').html('&nbsp;');
                 
                 markdownBox.initEditor();
+                
+                $('#wmd-html').val($wmdPreview.html());
             });
         },
         
