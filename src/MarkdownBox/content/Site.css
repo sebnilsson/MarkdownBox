@@ -1,1 +1,118 @@
-﻿
+﻿body {
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #000;
+}
+
+#message-box {
+    width: 100%;
+}
+#message-box div, html.no-js #message-box noscript {
+    background-color: #FDEDC1;
+    border-bottom: 1px solid #000;
+    color: #000;
+    display: block;
+    padding: 0.5em 0;
+    text-align: center;
+}
+#message-box .error {
+    background-color: #FF4500;
+    color: #ddd;
+}
+#message-box .error, #message-box .message {
+    cursor: pointer;
+}
+
+.no-display {
+    display: none;
+}
+
+#container {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+#top {
+    background-image: url('logo.png');
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-color: #000;
+    color: #fff;
+    font-weight: bold;
+    padding: 0.75em 45px 0.75em 0;
+    text-align: right;
+}
+
+#main {
+    background-color: #fff;
+    color: #000;
+    padding: 0.75em 0.5em;
+}
+
+#footer {
+    background-color: #555;
+    color: #ccc;
+    font-size: 0.75em;
+    padding: 0.5em 0;
+    text-align: center;
+}
+
+.wmd-panel, #wmd-preview, #wmd-html {
+    margin: 0.5em 0;
+}
+
+.wmd-input {
+    background-color: #eee;
+}
+
+.wmd-preview {
+    border: 1px solid #555;
+    padding: 0.25em;    
+}
+
+#wmd-html {
+    background-color: #ccc;
+    width: 100%;
+    height: 200px;
+}
+
+textarea {
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+}
+
+.button {
+    cursor: pointer;
+    color: #00e;
+}
+
+#directory-content {
+    border: 1px solid #555;
+    margin: 0 auto 1em;
+    max-width: 400px;
+}
+#directory-content-header {
+    background-color: #ccc;
+    padding: 0.25em;
+}
+#directory-content-entries {
+    padding: 0.25em;
+}
+#directory-content-entries.no-entries {
+    background-color: #ccc;
+    font-style: italic;
+}
+
+#directory-content .filename {
+    font-weight: bold;
+}
+#directory-content .filesize {
+    font-style: italic;
+    float: right;
+}
+#directory-content-refresh {
+    background-image: url('refresh.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+    height: 16px;
+    width: 16px;
+    float: right;
+}

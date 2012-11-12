@@ -6,7 +6,6 @@
 
 (function(window, document, undefined) {
     var markdownBox = {
-        appFolderName: 'MarkdownBoxFiles',
         converter: null,
         editor: null,
         encodedKey: 'kWWFk4v8E0A=|eLTWCRy1RDt8sJbVCXHYdHGAPrMWpBaGwgLkl6oPQg==',
@@ -18,6 +17,10 @@
                 sandbox: true
             });
             markdownBox.client.authDriver(new Dropbox.Drivers.Redirect());
+
+            $('#main').show();
+
+            markdownBox.initListeners();
             
             if (window.location.hash.indexOf('?_dropboxjs_scope') < 0) {
                 $('#dropbox-login').show();
@@ -34,26 +37,46 @@
                 }
 
                 $('#directory-content').show();
-                $('#entries-refresh').click(function() {
-                    markdownBox.listEntries();
-                });
-                $('#entries').on('click', '.entry', function () {
-                    var path = $(this).attr('data-path');
-                    markdownBox.populateEditor(path);
-                });
-
-                $('#save-button').click(function () {
-                    var path = $('#wmd-input').attr('data-path');
-                    var content = $('#wmd-input').val();
-                    
-                    markdownBox.saveEditor(path, content);
-                });
-
+                
                 markdownBox.listEntries();
+            });
+        },
+        
+        initListeners: function () {
+            $('#directory-content-header-text').click(function () {
+                markdownBox.toggleEntriesExpand();
+            });
+            $('#directory-content-refresh').click(function () {
+                markdownBox.listEntries();
+            });
+            $('#directory-content-entries').on('click', '.entry', function () {
+                var path = $(this).attr('data-path');
+                markdownBox.populateEditor(path);
+            });
+
+            $('#save-button').click(function () {
+                var path = $('#wmd-input').attr('data-path');
+                var content = $('#wmd-input').val();
+
+                markdownBox.saveEditor(path, content);
+            });
+            $('#reset-button').click(function () {
+                markdownBox.populateEditor();
+            });
+            $('#show-html').click(function () {
+                var html = $('#wmd-preview').html();
+                $('#wmd-html').val(html);
+            });
+        },
+        
+        initMessagebox: function () {
+            $('#message-box').on('click', '.error, .message', function() {
+                $(this).remove();
             });
         },
 
         showError: function (error) {
+            error = error || { };
             var message;
             switch (error.status) {
                 case 401:
@@ -72,7 +95,7 @@
                     message = '400: Bad input parameter.';
                     break;
                 case 403:
-                    message = '403:  OAuth request.';
+                    message = '403: Bad OAuth request.';
                     break;
                 case 405:
                     message = '405: Request method not expected.';
@@ -81,7 +104,11 @@
                     message = 'An unknown error occurred.';
             }
 
-            $('#error-message').text(message);
+            markdownBox.showMessage(message, true);
+        },
+        showMessage: function (message, isError) {
+            var errorClass = isError ? 'class="error" ' : 'class="message" ';
+            $('#message-box').append('<div ' + errorClass + 'title="Click to dismiss">' + message + '</div>');
         },
         
         initEditor: function () {
@@ -93,13 +120,14 @@
         },
 
         listEntries: function () {
+            var $entries = $('#directory-content-entries').empty();
+            
             markdownBox.client.readdir('/', function (error, entryTitles, data, entries) {
                 if (error) {
                     markdownBox.showError(error);
                     return;
                 }
 
-                var $entries = $('#entries').empty();
                 if (!entries.length) {
                     $entries.text('No entries found').addClass('no-entries');
                     return;
@@ -110,23 +138,36 @@
                     if (entry.isFolder) {
                         continue;
                     }
-                    
-                    $entries.append('<div class="entry" data-path="' + entry.path + '">' + entry.name + ' (' + entry.humanSize + ')</div>');
+
+                    markdownBox.addEntry(entry.name, entry.path, entry.humanSize, $entries);
                 }
+
+                markdownBox.setEntriesContract();
             });
         },
         
-        populateEditor: function(path) {
+        addEntry: function (name, path, size, $entries) {
+            $entries = $entries || $('#directory-content-entries');
+            
+            $entries.append('<div class="entry" data-path="' + path + '"><span class="filename">' + name + '</span>' +
+                ' <span class="filesize">(' + size + ')</span></div>');
+        },
+        
+        populateEditor: function (path) {
+            path = path || $('#wmd-input').attr('data-path');
+
             markdownBox.client.readFile(path, function (error, data) {
                 if (error) {
                     return showError(error);
                 }
 
+                markdownBox.setEntriesExpand();
+
                 $('#wmd-input').val(data).attr('data-path', path);
+                $('#wmd-preview').html('&nbsp;');
+                $('#wmd-html').val('');
                 
                 markdownBox.initEditor();
-                
-                console.log(data);
             });
         },
         
@@ -136,10 +177,40 @@
                     return showError(error);
                 }
 
-                console.log("File saved as revision " + stat.versionTag);
+                markdownBox.showMessage("File saved as revision " + stat.versionTag);
             });
+        },
+        
+        toggleEntriesExpand: function () {
+            var isExpanded = $('#directory-content-header-text').hasClass('expanded');
+            if (isExpanded) {
+                markdownBox.setEntriesExpand();
+            } else {
+                markdownBox.setEntriesContract();
+            }
+        },
+        setEntriesExpand: function () {
+            $('#directory-content-header-text').html('&#x25BC; Files').removeClass('expanded'); // ▼
+            $('#directory-content-entries').hide();
+        },
+        setEntriesContract: function () {
+            $('#directory-content-header-text').html('&#x25B2; Files').addClass('expanded'); // ▲
+            $('#directory-content-entries').show();
         }
     };
+    
+    if ($('html').hasClass('lt-ie10')) {
+        return;
+    }
 
+    //markdownBox.showMessage('Friendly message here');
+    //markdownBox.showError({ status: 401 });
+    //markdownBox.showError();
+
+    markdownBox.addEntry('TestName1', 'TestPath1', '5000 GB');
+    markdownBox.addEntry('TestName2', 'TestPath2', '5000 GB');
+    markdownBox.addEntry('TestName3', 'TestPath3', '5000 GB');
+    
+    markdownBox.initMessagebox();
     markdownBox.init();
 }(window, document));

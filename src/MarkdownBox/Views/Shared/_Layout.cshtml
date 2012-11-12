@@ -19,10 +19,11 @@
 }
 
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7]>      <html class="no-js lt-ie10 lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie10 lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie10 lt-ie9"> <![endif]-->
+<!--[if IE 9]>         <html class="no-js lt-ie10"> <![endif]-->
+<!--[if gt IE 9]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -41,25 +42,27 @@
 </head>
 <body class="@bodyClass">
     <div id="message-box">
-        <!--[if lt IE 9]>
-            <div class="important">
-                <p>You are using an outdated browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this website.</p>
+        <!--[if lt IE 10]>
+            <div>
+                You are using an outdated browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this website.
             </div>
         <![endif]-->
-        <noscript class="no-js">
-            <p><strong>This site will only work with Javascript</strong>. Please <a href="http://www.activatejavascript.org/">activate JavaScript</a>.</p>
+        <noscript>
+            <strong>This site will only work with Javascript</strong>. Please <a href="http://www.activatejavascript.org/">activate JavaScript</a>.
         </noscript>
     </div>
     
-    @*<header id="top">
-        MarkdownBox
-    </header>*@
+    <div id="container">
+        <header id="top">
+            MarkdownBox
+        </header>
 
-    <div id="main">
-        @RenderBody()
+        <div id="main" class="no-display">
+            @RenderBody()
+        </div>
+
+        <footer id="footer">Copyright &#169; @DateTime.Today.Year Sebastian Nilsson</footer>
     </div>
-
-    @*<footer id="footer">Copyright &#169; @DateTime.Today.Year Sebastian Nilsson</footer>*@
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.6.1/dropbox.min.js"></script>
