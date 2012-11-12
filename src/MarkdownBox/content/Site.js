@@ -63,9 +63,18 @@
             $('#reset-button').click(function () {
                 markdownBox.populateEditor();
             });
-            $('#show-html').click(function () {
-                var html = $('#wmd-preview').html();
-                $('#wmd-html').val(html);
+            //$('#show-html').click(function () {
+            //    var html = $('#wmd-preview').html();
+            //    $('#wmd-html').val(html);
+            //});
+            var $wmdHtml = $('#wmd-html');
+            var $wmdInput = $('#wmd-input');
+            $wmdInput.on('change', function () {
+                $wmdHtml.html($wmdInput.val());
+            });
+            
+            $wmdHtml.click(function () {
+                $wmdHtml.select();
             });
         },
         
