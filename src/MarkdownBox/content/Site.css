@@ -59,6 +59,9 @@
 .wmd-panel, #wmd-preview, #wmd-html {
     margin: 0.5em 0;
 }
+#wmd-button-bar {
+    overflow: hidden;
+}
 
 .wmd-input {
     background-color: #eee;

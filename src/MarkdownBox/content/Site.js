@@ -16,28 +16,32 @@
                 key: markdownBox.encodedKey,
                 sandbox: true
             });
-            markdownBox.client.authDriver(new Dropbox.Drivers.Redirect());
+            markdownBox.client.authDriver(new Dropbox.Drivers.Redirect({ rememberUser: true }));
 
             $('#main').show();
 
             markdownBox.initListeners();
             
-            if (window.location.hash.indexOf('?_dropboxjs_scope') < 0) {
-                $('#dropbox-login').show();
+            /*if (window.location.hash.indexOf('?_dropboxjs_scope') >= 0) {
+                $('#dropbox-login').hide();
                 $('#dropbox-login button').one('click', function() {
-                    markdownBox.client.authenticate();
+                    markdownBox.authenticate();
                 });
                 return;
-            }
+            }*/
 
-            markdownBox.client.authenticate(function (error, client) {
+            markdownBox.authenticate();
+        },
+        
+        authenticate: function () {
+            markdownBox.client.authenticate(function (error) {
                 if (error) {
                     markdownBox.showError(error);
                     return;
                 }
 
                 $('#directory-content').show();
-                
+
                 markdownBox.listEntries();
             });
         },
@@ -63,10 +67,8 @@
             $('#reset-button').click(function () {
                 markdownBox.populateEditor();
             });
-            //$('#show-html').click(function () {
-            //    var html = $('#wmd-preview').html();
-            //    $('#wmd-html').val(html);
-            //});
+            
+
             var $wmdHtml = $('#wmd-html');
             var $wmdInput = $('#wmd-input');
             var $wmdPreview = $('#wmd-preview');
@@ -77,8 +79,10 @@
             $wmdHtml.click(function () {
                 $wmdHtml.select();
             });
-            $wmdPreview.on('keyup', function (e) {
+            $wmdHtml.keydown(function (e) {
                 e.preventDefault();
+                e.stopPropagation();
+                return false;
             });
         },
         
@@ -130,6 +134,7 @@
             markdownBox.converter = markdownBox.converter || Markdown.getSanitizingConverter();
             markdownBox.editor = markdownBox.editor || new Markdown.Editor(markdownBox.converter);
             markdownBox.editor.run();
+            markdownBox.editor.refreshPreview();
         },
 
         listEntries: function () {
@@ -171,7 +176,8 @@
 
             markdownBox.client.readFile(path, function (error, data) {
                 if (error) {
-                    return showError(error);
+                    markdownBox.showError(error);
+                    return;
                 }
 
                 markdownBox.setEntriesExpand();
@@ -188,7 +194,8 @@
         saveEditor: function(path, content) {
             markdownBox.client.writeFile(path, content, function (error, stat) {
                 if (error) {
-                    return showError(error);
+                    markdownBox.showError(error);
+                    return;
                 }
 
                 markdownBox.showMessage("File saved as revision " + stat.versionTag);
