@@ -1,12 +1,28 @@
-﻿<div id="directory-content" class="no-display">
+﻿@*<div id="user-info" class="no-display">
+    <span id="user-name"></span>
+    <button id="user-logout" class="click-once">Logout</button>
+</div>*@
+
+@*<div id="user-login">
+    You are not logged in to Dropbox.
+    <span id="user-login-button" class="clickable">Log in</span>
+</div>*@
+
+<div id="directory-content" class="no-display">
     <div id="directory-content-header">
-        <span id="directory-content-header-text" class="button expanded">&#x25B2; Files</span>
-        <span id="directory-content-refresh" class="button">&nbsp;</span>
+        <span id="directory-content-header-text" class="clickable expanded">&#x25B2; Files</span>
+        <span id="directory-content-refresh" class="clickable">&nbsp;</span>
+        <span id="directory-content-spinner" class="no-display">&nbsp;</span>
     </div>
     <div id="directory-content-entries"></div>
 </div>
 
+<div id="wmd-spinner-area" class="no-display">
+    <span id="wmd-spinner">&nbsp;</span>
+</div>
+
 <div id="wmd" class="no-display">
+    <div id="wmd-file-title"></div>
     <div class="wmd-panel">
         <div id="wmd-button-bar"></div>
         <textarea class="wmd-input" id="wmd-input"></textarea>
@@ -16,8 +32,6 @@
     <button id="reset-button">Reset</button>
 
     <div id="wmd-preview" class="wmd-panel wmd-preview">&nbsp;</div>
-    
-    @*<button id="show-html">Show HTML</button>*@
     
     <textarea id="wmd-html"></textarea>
 </div>

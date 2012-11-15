@@ -146,6 +146,8 @@
     <Content Include="content\refresh.png" />
     <Content Include="content\Site.css" />
     <Content Include="content\Site.js" />
+    <Content Include="content\spinner_16x16.gif" />
+    <Content Include="content\spinner_48x48.gif" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="libraries\dropbox.0.6.1.min.js" />

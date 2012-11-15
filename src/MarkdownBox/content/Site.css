@@ -3,6 +3,16 @@
     background-color: #000;
 }
 
+.clearfix:before,
+.clearfix:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.clearfix:after {
+    clear: both;
+}
+
 #message-box {
     width: 100%;
 }
@@ -59,6 +69,22 @@
 .wmd-panel, #wmd-preview, #wmd-html {
     margin: 0.5em 0;
 }
+#wmd-spinner-area {
+    text-align: center;
+    width: 100%;
+}
+#wmd-spinner {
+    background-image: url('spinner_48x48.gif');
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 48px;
+    width: 48px;
+}
+#wmd-file-title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
 #wmd-button-bar {
     overflow: hidden;
 }
@@ -71,6 +97,12 @@
     border: 1px solid #555;
     padding: 0.25em;    
 }
+.wmd-preview >p:first-of-type {
+    margin-top: 0.25em;
+}
+.wmd-preview >p:last-of-type {
+    margin-bottom: 0.25em;
+}
 
 #wmd-html {
     background-color: #ccc;
@@ -82,7 +114,7 @@ textarea {
     font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
 }
 
-.button {
+.clickable {
     cursor: pointer;
     color: #00e;
 }
@@ -111,11 +143,53 @@ textarea {
     font-style: italic;
     float: right;
 }
-#directory-content-refresh {
-    background-image: url('refresh.png');
+#directory-content-refresh, #directory-content-spinner {
     background-position: center center;
     background-repeat: no-repeat;
     height: 16px;
     width: 16px;
     float: right;
+}
+#directory-content-refresh {
+    background-image: url('refresh.png');
+}
+#directory-content-spinner {
+    background-image: url('spinner_16x16.gif');
+}
+
+#user-info {
+    background-color: #ccc;
+    border: 1px solid #555;
+    float: right;
+}
+#user-name {
+    font-weight: bold;
+}
+#user-logout {
+    border: 1px solid #555;
+}
+
+/* Smartphone */
+@media screen and (max-width: 320px) {
+    body {
+        font-size: 0.6em;
+    }
+}
+/* Low-res */
+@media screen and (max-width: 540px) {
+    body {
+        font-size: 0.7em;
+    }
+}
+/* Tablet */
+@media screen and (max-width: 768px) {
+    body {
+        font-size: 0.8em;
+    }
+}
+/* Netbook */
+@media screen and (max-width: 1024px) {
+    body {
+        font-size: 0.9em;
+    }
 }
