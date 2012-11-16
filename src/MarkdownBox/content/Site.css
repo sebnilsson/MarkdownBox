@@ -92,11 +92,13 @@
 
 #wmd-input {
     background-color: #eee;
+    width: 100%;
 }
 
 #wmd-preview {
     border: 1px solid #555;
-    padding: 0.25em;    
+    padding: 0.25em;
+    width: 100%;
 }
 #wmd-preview >p:first-of-type {
     margin-top: 0.25em;
