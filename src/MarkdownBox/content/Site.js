@@ -252,6 +252,8 @@
             wmd.editor = wmd.editor || new Markdown.Editor(wmd.converter);
             wmd.editor.run();
             wmd.editor.refreshPreview();
+            
+            wmd.initBoxHeights();
         },
         
         load: function (path, title) {
@@ -282,7 +284,7 @@
                 wmd.loadEnd();
                 
                 $('html, body').animate({
-                    scrollTop: $('#wmd').offset().top
+                    scrollTop: $('#wmd-panel').offset().top
                 }, 500, function () {
                     $wmdInput.focus();
                 });
@@ -296,6 +298,24 @@
         loadEnd: function () {
             $('#wmd-spinner-area').hide();
             $('#wmd').show();
+        },
+        isHeightInit: false,
+        initBoxHeights: function () {
+            if (wmd.isHeightInit) {
+                return;
+            }
+            wmd.isHeightInit = true;
+            
+            var wmdBoxHeightCss = $('.wmd-box').css('height').replace('px', '');
+            var wmdBoxHeight = parseInt(wmdBoxHeightCss, 10);
+
+            var windowHeight = $(window).height();
+            if (wmdBoxHeight > windowHeight) {
+                var boxHeight = (windowHeight - 2);
+                $('.wmd-box').height(boxHeight);
+                var buttonBarHeight = $('#wmd-button-bar').height();
+                $('#wmd-input').height((boxHeight - buttonBarHeight));
+            }
         }
     };
 
