@@ -98,12 +98,12 @@
 #wmd-preview {
     border: 1px solid #555;
     padding: 0.25em;
-    width: 100%;
+    width: 98%;
 }
-#wmd-preview >p:first-of-type {
+#wmd-preview > p:first-of-type {
     margin-top: 0.25em;
 }
-#wmd-preview >p:last-of-type {
+#wmd-preview > p:last-of-type {
     margin-bottom: 0.25em;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .wmd-box {
-    height: 500px;
+    height: 400px;
 }
 
 textarea {
@@ -148,7 +148,7 @@ textarea {
 }
 #directory-content .filesize {
     font-style: italic;
-    float: right;
+    /*float: right;*/
 }
 #directory-content-refresh, #directory-content-spinner {
     background-position: center center;
@@ -181,11 +181,17 @@ textarea {
     body {
         font-size: 0.6em;
     }
+    #main {
+        padding: 0.75em 2px;
+    }
 }
 /* Low-res */
 @media screen and (max-width: 540px) {
     body {
         font-size: 0.7em;
+    }
+    #main {
+        padding: 0.75em 0.25em;
     }
 }
 /* Tablet */
