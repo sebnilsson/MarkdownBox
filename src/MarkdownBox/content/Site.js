@@ -337,4 +337,9 @@
     dropboxClient.init();
 
     window.scrollTo(0, 1);
+    setTimeout(function () {
+        if($(document).scrollTop() < 1) {
+            window.scrollTo(0, 1);
+        }
+    }, 1000);
 }(window, document));
