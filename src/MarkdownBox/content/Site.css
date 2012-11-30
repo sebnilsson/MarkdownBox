@@ -54,6 +54,8 @@
 
 #main {
     background-color: #fff;
+    -webkit-border-radius: 3px 3px 0 0;
+    border-radius: 3px 3px 0 0;
     color: #000;
     padding: 0.75em 0.5em;
 }
@@ -119,6 +121,11 @@
 
 textarea {
     font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    
+    -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
 }
 
 .clickable {
@@ -162,6 +169,13 @@ textarea {
 }
 #directory-content-spinner {
     background-image: url('spinner_16x16.gif');
+}
+
+#directory-content, #wmd-preview {
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    
+    -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
 }
 
 #user-info {
