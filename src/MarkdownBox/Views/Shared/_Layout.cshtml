@@ -39,6 +39,7 @@
     @Js("bundled-head")
 
     @Css("bundled-site")
+    <link rel="stylesheet" href="~/libraries/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
 </head>
 <body class="@bodyClass">
     <div id="message-box">
@@ -64,14 +65,27 @@
         <footer id="footer">Copyright &#169; @DateTime.Today.Year Sebastian Nilsson</footer>
     </div>
     
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <div id="modal-textbox-add" class="no-display">
+        Add new file<br />
+        <input type="text" style="width: 97%;" />
+        <button>Add</button>
+    </div>
+    
+    <div id="modal-textbox-rename" class="no-display">
+        Rename file '<span id="rename-title"></span>'<br />
+        <input type="text" style="width: 97%;" />
+        <button>Rename</button>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.6.1/dropbox.min.js"></script>
     <script>
-        window.jQuery || document.write('<script src="@Url.Content("~/libraries/jquery-1.8.2.min.js")"><\/script>');
+        window.jQuery || document.write('<script src="@Url.Content("~/libraries/jquery-1.8.3.min.js")"><\/script>');
         window.Dropbox || document.write('<script src="@Url.Content("~/libraries/dropbox.0.6.1.min.js")"><\/script>');
 
         var basePath = '@Url.Content("~/")';
     </script>
+    <script src="~/libraries/fancybox/jquery.fancybox.pack.js"></script>
         
     @RenderSection("BottomScripts", false)
     
@@ -79,7 +93,7 @@
     
     @*<script type="text/javascript">
         var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-36224162-1']);
+        _gaq.push(['_setAccount', 'UA-XXXXXXX-X']);
         _gaq.push(['_trackPageview']);
 
         (function () {

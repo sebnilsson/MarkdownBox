@@ -151,7 +151,14 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="libraries\dropbox.0.6.1.min.js" />
-    <Content Include="libraries\jquery-1.8.2.min.js" />
+    <Content Include="libraries\fancybox\blank.gif" />
+    <Content Include="libraries\fancybox\fancybox_loading.gif" />
+    <Content Include="libraries\fancybox\fancybox_overlay.png" />
+    <Content Include="libraries\fancybox\fancybox_sprite.png" />
+    <Content Include="libraries\fancybox\jquery.fancybox.css" />
+    <Content Include="libraries\fancybox\jquery.fancybox.js" />
+    <Content Include="libraries\fancybox\jquery.fancybox.pack.js" />
+    <Content Include="libraries\jquery-1.8.3.min.js" />
     <Content Include="libraries\Modernizr.2.6.2.custom.js" />
     <Content Include="libraries\Modernizr.2.6.2.dev.js" />
     <Content Include="libraries\Normalize.css" />

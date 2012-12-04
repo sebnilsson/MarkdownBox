@@ -8,13 +8,16 @@
     <span id="user-login-button" class="clickable">Log in</span>
 </div>*@
 
-<div id="directory-content" class="no-display">
+<div id="directory" class="no-display">
     <div id="directory-content-header">
         <span id="directory-content-header-text" class="clickable expanded">&#x25B2; Files</span>
         <span id="directory-content-refresh" class="clickable">&nbsp;</span>
         <span id="directory-content-spinner" class="no-display">&nbsp;</span>
     </div>
-    <div id="directory-content-entries"></div>
+    <div id="directory-content">
+        <div id="directory-content-entries"></div>
+        <div id="file-add" class="clickable"><a href="#modal-textbox-add"><strong>+</strong> Add New File</a></div>
+    </div>
 </div>
 
 <div id="wmd-spinner-area" class="no-display">
@@ -22,7 +25,7 @@
 </div>
 
 <div id="wmd" class="no-display">
-    <div id="wmd-file-title"></div>
+    <div><span id="wmd-file-title"></span> <a id="file-rename" href="#modal-textbox-rename">[rename]</a></div>
     <div id="wmd-panel">
         <div id="wmd-button-bar"></div>
         <textarea id="wmd-input"></textarea>

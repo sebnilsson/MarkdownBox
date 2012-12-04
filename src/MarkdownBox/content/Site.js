@@ -39,7 +39,7 @@
                     html.messageBox.showMessage('You are logged in as <strong>' + userInfo.name + '</strong>', false, 3000);
                 });
 
-                $('#directory-content').show();
+                $('#directory').show();
 
                 html.directory.load();
             });
@@ -55,6 +55,18 @@
                 html.messageBox.showMessage("File saved as revision " + stat.versionTag);
             });
         }
+    };
+
+    var getFilePath = function(fileName) {
+        return '/' + fileName + '.txt';
+    };
+    var getFileName = function (filePath) {
+        var trimmed = $.trim(filePath);
+        if (!trimmed) {
+            return '';
+        }
+
+        return trimmed.slice(1, trimmed.length - 4);
     };
 
     var html = {
@@ -94,6 +106,98 @@
                 if (result) {
                     wmd.load();
                 }
+            });
+
+            $('#file-add a').fancybox({
+                autoCenter: true,
+                //autoSize: true,
+                maxWidth: '400px',
+                height: '60px',
+                beforeLoad: function() {
+                    $('#modal-textbox-add input').val('');
+                },
+                afterLoad: function () {
+                    $('#modal-textbox-add input').focus().select();
+                }
+            });
+
+            $('#file-rename').fancybox({
+                autoCenter: true,
+                //autoSize: true,
+                maxWidth: '400px',
+                height: '60px',
+                beforeLoad: function () {
+                    var filePath = $('#wmd-input').attr('data-path');
+                    var fileName = getFileName(filePath);
+                    $('#rename-title').text(fileName);
+                    $('#modal-textbox-rename input').val(fileName);
+                },
+                afterLoad: function () {
+                    $('#modal-textbox-rename input').focus().select();
+                }
+            });
+
+            var validateModalInput = function (fileName) {
+                if (!fileName) {
+                    alert('File must have a name!');
+                    return false;
+                }
+                return true;
+            };
+            $('#modal-textbox-add button').click(function () {
+                // TODO: Warn if file open
+                
+                var fileName = $('#modal-textbox-add input').val();
+                var isValid = validateModalInput(fileName);
+                if (!isValid) {
+                    return;
+                }
+
+                html.directory.setCollapsed();
+                wmd.loadStart();
+
+                var path = getFilePath(fileName);
+                dropboxClient.client.writeFile(path, '', function (error, stat) {
+                    if (error) {
+                        html.messageBox.showError(error);
+                        wmd.loadEnd();
+                    } else {
+                        html.messageBox.showMessage("File added as revision " + stat.versionTag);
+                        wmd.loadEnd();
+                        html.directory.load();
+                    }
+                });
+
+                $.fancybox.close();
+            });
+
+            $('#modal-textbox-rename button').click(function () {
+                // TODO: Warn if file open
+
+                var fileName = $('#modal-textbox-rename input').val();
+                var isValid = validateModalInput(fileName);
+                if (!isValid) {
+                    return;
+                }
+
+                html.directory.setCollapsed();
+                wmd.loadStart();
+                
+                var fromPath = $('#wmd-input').attr('data-path');
+                var toPath = getFilePath(fileName);
+                dropboxClient.client.move(fromPath, toPath, function (error, stat) {
+                    if (error) {
+                        html.messageBox.showError(error);
+                        wmd.loadEnd();
+                    } else {
+                        html.messageBox.showMessage("File moved as revision " + stat.versionTag);
+                        wmd.loadEnd();
+                        html.directory.load();
+                        wmd.load(toPath, fileName);
+                    }
+                });
+
+                $.fancybox.close();
             });
 
             var $wmdHtml = $('#wmd-html');
@@ -220,11 +324,11 @@
             },
             setExpanded: function () {
                 $('#directory-content-header-text').html('&#x25B2; Files').addClass('expanded'); // ▲
-                $('#directory-content-entries').show();
+                $('#directory-content').show();
             },
             setCollapsed: function () {
                 $('#directory-content-header-text').html('&#x25BC; Files').removeClass('expanded'); // ▼
-                $('#directory-content-entries').hide();
+                $('#directory-content').hide();
             },
             
             loadStart: function () {
@@ -316,6 +420,10 @@
                 var buttonBarHeight = $('#wmd-button-bar').height();
                 $('#wmd-input').height((boxHeight - buttonBarHeight));
             }
+        },
+        
+        rename: function() {
+            
         }
     };
 

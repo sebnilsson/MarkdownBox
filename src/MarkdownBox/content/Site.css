@@ -92,6 +92,10 @@
     overflow: hidden;
 }
 
+#wmd-input, #wmd-preview, #wmd-html {
+    height: 400px;
+}
+
 #wmd-input {
     background-color: #eee;
     width: 100%;
@@ -99,6 +103,7 @@
 
 #wmd-preview {
     border: 1px solid #555;
+    overflow: auto;
     padding: 0.25em;
     width: 98%;
 }
@@ -112,11 +117,6 @@
 #wmd-html {
     background-color: #ccc;
     width: 100%;
-    height: 200px;
-}
-
-.wmd-box {
-    height: 400px;
 }
 
 textarea {
@@ -133,7 +133,7 @@ textarea {
     color: #00e;
 }
 
-#directory-content {
+#directory {
     border: 1px solid #555;
     margin: 0 auto 1em;
     max-width: 400px;
@@ -149,11 +149,19 @@ textarea {
     background-color: #ccc;
     font-style: italic;
 }
+#file-add {
+    border-top: 1px solid #555;
+    padding: 0.25em;
+    font-style: italic;
+}
+#file-rename {
+    font-size: 0.8em;
+}
 
-#directory-content .filename {
+#directory .filename {
     font-weight: bold;
 }
-#directory-content .filesize {
+#directory .filesize {
     font-style: italic;
     /*float: right;*/
 }
@@ -171,7 +179,7 @@ textarea {
     background-image: url('spinner_16x16.gif');
 }
 
-#directory-content, #wmd-preview {
+#directory, #wmd-preview {
     -webkit-border-radius: 2px;
     border-radius: 2px;
     
