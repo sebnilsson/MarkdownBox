@@ -47,14 +47,17 @@
             });
         },
 
-        saveFile: function (path, content) {
+        saveFile: function (path, content, callback) {
             dropboxClient.client.writeFile(path, content, function (error, stat) {
                 if (error) {
                     html.messageBox.showError(error);
-                    return;
+                } else {
+                    html.messageBox.showMessage("File saved as revision " + stat.versionTag);
                 }
 
-                html.messageBox.showMessage("File saved as revision " + stat.versionTag);
+                if (typeof (callback) === 'function') {
+                    callback();
+                }
             });
         }
     };
@@ -87,17 +90,17 @@
                 var $this = $(this);
                 var path = $this.attr('data-path');
                 var isDirectory = !!$(this).attr('data-is-directory');
-                
+
                 if (isDirectory) {
                     var lastIndex = path.lastIndexOf('/');
                     var parentDirectory = path.slice(0, lastIndex) || '/';
                     $('#directory').attr('data-parent', parentDirectory);
-                    
+
                     $('#directory').attr('data-path', path);
                     html.directory.load(path);
                     return;
                 }
-                
+
                 if (isDirty) {
                     var result = html.confirmChangesLost('Are you sure you want to change file?');
                     if (!result) {
@@ -110,10 +113,7 @@
             });
 
             $('#save-button').click(function () {
-                var path = $('#wmd-input').attr('data-path');
-                var content = $('#wmd-input').val();
-
-                dropboxClient.saveFile(path, content);
+                wmd.saveFile();
             });
             $('#reset-button').click(function () {
                 if (!isDirty) {
@@ -122,6 +122,14 @@
                 var result = html.confirmChangesLost('Are you sure you want to reset?');
                 if (result) {
                     wmd.load();
+                }
+            });
+            $('#auto-save').click(function () {
+                var isChecked = $(this).is(':checked');
+                if (isChecked) {
+                    wmd.enableAutoSave();
+                } else {
+                    wmd.disableAutoSave();
                 }
             });
 
@@ -218,7 +226,7 @@
                         html.messageBox.showMessage("File added as revision " + stat.versionTag);
                         html.directory.load();
                     }
-                    
+
                     wmd.loadEnd();
                 });
 
@@ -245,7 +253,7 @@
                         html.directory.load();
                         wmd.load(toPath, fileName);
                     }
-                    
+
                     wmd.loadEnd();
                 });
 
@@ -361,7 +369,7 @@
                         return;
                     }
 
-                    entries.sort(function(a, b) {
+                    entries.sort(function (a, b) {
                         var d = (+a.isFolder) - (+b.isFolder);
                         if (d !== 0) {
                             return d;
@@ -506,6 +514,36 @@
 
         hide: function () {
             $('#wmd').hide();
+        },
+
+        saveFile: function () {
+            var path = $('#wmd-input').attr('data-path');
+            var content = $('#wmd-input').val();
+
+            var $buttons = $('#wmd button, #wmd input').hide();
+            var $navigation = $('#directory, #file-rename, #file-delete').hide();
+            var $saveSpinner = $('#save-spinner').removeClass('no-display');
+
+            dropboxClient.saveFile(path, content, function () {
+                $buttons.show();
+                $navigation.show();
+                $saveSpinner.addClass('no-display');
+            });
+        },
+
+        autoSaveTimeoutId: 0,
+        autoSave: function() {
+            clearTimeout(wmd.autoSaveTimeoutId);
+
+            wmd.autoSaveTimeoutId = setTimeout(function () {
+                wmd.saveFile();
+            }, 20000);
+        },
+        enableAutoSave: function () {
+            $('#wmd-input').on('keyup', wmd.autoSave);
+        },
+        disableAutoSave: function () {
+            $('#wmd-input').off('keyup', wmd.autoSave);
         }
     };
 

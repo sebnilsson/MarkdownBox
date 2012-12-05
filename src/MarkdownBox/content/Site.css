@@ -105,6 +105,18 @@ a, a:link, a:hover, a:active, a:visited {
     width: 100%;
 }
 
+#save-spinner {
+    background-image: url('spinner_16x16.gif');
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+}
+#save-spinner.no-display {
+    display: none;
+}
+
 #wmd-preview {
     border: 1px solid #555;
 
