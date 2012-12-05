@@ -2,11 +2,11 @@
 @using SquishIt.Mvc
 
 @{
-    string siteText = "MarkdownBox";
+    const string SiteText = "MarkdownBox";
     string viewBagTitle = Convert.ToString(ViewBag.Title ?? string.Empty);
     bool hasPrefixText = !string.IsNullOrWhiteSpace(viewBagTitle);
 
-    string pageTitle = (hasPrefixText) ? string.Format("{0} - {1}", viewBagTitle, siteText) : siteText;
+    string pageTitle = (hasPrefixText) ? string.Format("{0} - {1}", viewBagTitle, SiteText) : SiteText;
 
     string bodyClass = Convert.ToString(ViewBag.BodyClass);
 }
@@ -39,13 +39,12 @@
     @Js("bundled-head")
 
     @Css("bundled-site")
-    <link rel="stylesheet" href="~/libraries/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
 </head>
 <body class="@bodyClass">
     <div id="message-box">
         <!--[if lt IE 10]>
             <div>
-                You are using an outdated browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this website.
+                You are using an outdated browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this website.
             </div>
         <![endif]-->
         <noscript>
@@ -85,7 +84,6 @@
 
         var basePath = '@Url.Content("~/")';
     </script>
-    <script src="~/libraries/fancybox/jquery.fancybox.pack.js"></script>
         
     @RenderSection("BottomScripts", false)
     

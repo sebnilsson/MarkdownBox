@@ -8,7 +8,7 @@
     <span id="user-login-button" class="clickable">Log in</span>
 </div>*@
 
-<div id="directory" class="no-display">
+<div id="directory" class="no-display" data-path="/">
     <div id="directory-content-header">
         <span id="directory-content-header-text" class="clickable expanded">&#x25B2; Files</span>
         <span id="directory-content-refresh" class="clickable">&nbsp;</span>
@@ -25,7 +25,11 @@
 </div>
 
 <div id="wmd" class="no-display">
-    <div><span id="wmd-file-title"></span> <a id="file-rename" href="#modal-textbox-rename">[rename]</a></div>
+    <div>
+        <span id="wmd-file-title"></span>
+        <a id="file-rename" href="#modal-textbox-rename">[rename]</a>
+        <a id="file-delete" href="#">[delete]</a>
+    </div>
     <div id="wmd-panel">
         <div id="wmd-button-bar"></div>
         <textarea id="wmd-input"></textarea>

@@ -3,6 +3,10 @@
     background-color: #000;
 }
 
+a, a:link, a:hover, a:active, a:visited {
+    color: #00e;
+}
+
 .clearfix:before,
 .clearfix:after {
     content: " "; /* 1 */
@@ -103,9 +107,15 @@
 
 #wmd-preview {
     border: 1px solid #555;
+
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+
     overflow: auto;
     padding: 0.25em;
-    width: 98%;
+    width: 99%;
 }
 #wmd-preview > p:first-of-type {
     margin-top: 0.25em;
@@ -149,12 +159,18 @@ textarea {
     background-color: #ccc;
     font-style: italic;
 }
+#directory-content-entries .nav {
+    margin-bottom: 0.25em;
+}
+#directory-content-entries .nav .filename {
+    font-weight: normal;
+}
 #file-add {
     border-top: 1px solid #555;
     padding: 0.25em;
     font-style: italic;
 }
-#file-rename {
+#file-rename, #file-delete {
     font-size: 0.8em;
 }
 
@@ -179,7 +195,7 @@ textarea {
     background-image: url('spinner_16x16.gif');
 }
 
-#directory, #wmd-preview {
+#directory {
     -webkit-border-radius: 2px;
     border-radius: 2px;
     
@@ -206,6 +222,9 @@ textarea {
     #main {
         padding: 0.75em 2px;
     }
+    #wmd-preview {
+        width: 97%;
+    }
 }
 /* Low-res */
 @media screen and (max-width: 540px) {
@@ -214,6 +233,9 @@ textarea {
     }
     #main {
         padding: 0.75em 0.25em;
+    }
+    #wmd-preview {
+        width: 98%;
     }
 }
 /* Tablet */

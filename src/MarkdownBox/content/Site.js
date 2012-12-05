@@ -6,7 +6,9 @@
 
 (function (window, document, undefined) {
     'use strict';
-    
+
+    var isDirty = false;
+
     var dropboxClient = {
         encodedKey: 'kWWFk4v8E0A=|eLTWCRy1RDt8sJbVCXHYdHGAPrMWpBaGwgLkl6oPQg==',
         client: null,
@@ -19,7 +21,7 @@
             dropboxClient.client.authDriver(new Dropbox.Drivers.Redirect({ rememberUser: true }));
 
             dropboxClient.authenticate();
-            
+
             $('#main').show();
         },
 
@@ -29,7 +31,7 @@
                     html.messageBox.showError(error);
                     return;
                 }
-                
+
                 dropboxClient.client.getUserInfo(function (error, userInfo) {
                     if (error) {
                         html.messageBox.showError(error);
@@ -57,7 +59,7 @@
         }
     };
 
-    var getFilePath = function(fileName) {
+    var getFilePath = function (fileName) {
         return '/' + fileName + '.txt';
     };
     var getFileName = function (filePath) {
@@ -82,16 +84,28 @@
                 html.directory.load();
             });
             $('#directory-content-entries').on('click', '.entry', function () {
-                var path = $(this).attr('data-path');
-                var title = $('.filename', this).text();
-                var currentPath = $('#wmd-input').attr('data-path');
-                if (currentPath) {
-                    var result = confirm('Are you sure you want to change file? All changes will be lost.');
+                var $this = $(this);
+                var path = $this.attr('data-path');
+                var isDirectory = !!$(this).attr('data-is-directory');
+                
+                if (isDirectory) {
+                    var lastIndex = path.lastIndexOf('/');
+                    var parentDirectory = path.slice(0, lastIndex) || '/';
+                    $('#directory').attr('data-parent', parentDirectory);
+                    
+                    $('#directory').attr('data-path', path);
+                    html.directory.load(path);
+                    return;
+                }
+                
+                if (isDirty) {
+                    var result = html.confirmChangesLost('Are you sure you want to change file?');
                     if (!result) {
                         return;
                     }
                 }
 
+                var title = $('.filename', this).text();
                 wmd.load(path, title);
             });
 
@@ -102,7 +116,10 @@
                 dropboxClient.saveFile(path, content);
             });
             $('#reset-button').click(function () {
-                var result = confirm('Are you sure you want to reset? All changes will be lost.');
+                if (!isDirty) {
+                    return;
+                }
+                var result = html.confirmChangesLost('Are you sure you want to reset?');
                 if (result) {
                     wmd.load();
                 }
@@ -110,10 +127,16 @@
 
             $('#file-add a').fancybox({
                 autoCenter: true,
-                //autoSize: true,
                 maxWidth: '400px',
                 height: '60px',
-                beforeLoad: function() {
+                beforeLoad: function () {
+                    if (isDirty) {
+                        var result = html.confirmChangesLost('Are you sure you want to add new file?');
+                        if (!result) {
+                            return;
+                        }
+                    }
+
                     $('#modal-textbox-add input').val('');
                 },
                 afterLoad: function () {
@@ -121,12 +144,22 @@
                 }
             });
 
+            $('#wmd-input').keyup(function () {
+                isDirty = true;
+            });
+
             $('#file-rename').fancybox({
                 autoCenter: true,
-                //autoSize: true,
                 maxWidth: '400px',
                 height: '60px',
                 beforeLoad: function () {
+                    if (isDirty) {
+                        var result = html.confirmChangesLost('Are you sure you want to rename this file?');
+                        if (!result) {
+                            return false;
+                        }
+                    }
+
                     var filePath = $('#wmd-input').attr('data-path');
                     var fileName = getFileName(filePath);
                     $('#rename-title').text(fileName);
@@ -135,6 +168,29 @@
                 afterLoad: function () {
                     $('#modal-textbox-rename input').focus().select();
                 }
+            });
+            $('#file-delete').click(function (e) {
+                e.preventDefault();
+
+                var result = html.confirmChangesLost('Are you sure you want to delete this file?');
+                if (!result) {
+                    return;
+                }
+                wmd.loadStart();
+                html.directory.setCollapsed();
+
+                var filePath = $('#wmd-input').attr('data-path');
+                dropboxClient.client.delete(filePath, function (error, stat) {
+                    if (error) {
+                        html.messageBox.showError(error);
+                    } else {
+                        html.messageBox.showMessage("File moved as revision " + stat.versionTag);
+                        html.directory.load();
+                    }
+
+                    wmd.loadEnd();
+                    wmd.hide();
+                });
             });
 
             var validateModalInput = function (fileName) {
@@ -145,8 +201,6 @@
                 return true;
             };
             $('#modal-textbox-add button').click(function () {
-                // TODO: Warn if file open
-                
                 var fileName = $('#modal-textbox-add input').val();
                 var isValid = validateModalInput(fileName);
                 if (!isValid) {
@@ -160,20 +214,18 @@
                 dropboxClient.client.writeFile(path, '', function (error, stat) {
                     if (error) {
                         html.messageBox.showError(error);
-                        wmd.loadEnd();
                     } else {
                         html.messageBox.showMessage("File added as revision " + stat.versionTag);
-                        wmd.loadEnd();
                         html.directory.load();
                     }
+                    
+                    wmd.loadEnd();
                 });
 
                 $.fancybox.close();
             });
 
             $('#modal-textbox-rename button').click(function () {
-                // TODO: Warn if file open
-
                 var fileName = $('#modal-textbox-rename input').val();
                 var isValid = validateModalInput(fileName);
                 if (!isValid) {
@@ -182,19 +234,19 @@
 
                 html.directory.setCollapsed();
                 wmd.loadStart();
-                
+
                 var fromPath = $('#wmd-input').attr('data-path');
                 var toPath = getFilePath(fileName);
                 dropboxClient.client.move(fromPath, toPath, function (error, stat) {
                     if (error) {
                         html.messageBox.showError(error);
-                        wmd.loadEnd();
                     } else {
                         html.messageBox.showMessage("File moved as revision " + stat.versionTag);
-                        wmd.loadEnd();
                         html.directory.load();
                         wmd.load(toPath, fileName);
                     }
+                    
+                    wmd.loadEnd();
                 });
 
                 $.fancybox.close();
@@ -216,9 +268,16 @@
                 return false;
             });
 
-            $('.click-once').click(function() {
+            $('.click-once').click(function () {
                 $(this).attr('disabled', 'disabled');
             });
+        },
+
+        confirmChangesLost: function (customText) {
+            customText = $.trim(customText + '\n\nAll changes will be lost!');
+
+            var result = confirm(customText);
+            return result;
         },
 
         messageBox: {
@@ -268,17 +327,17 @@
                     }, timeout);
                 }
             },
-            removeMessage: function($element) {
-                $element.animate({ height: '0px' }, 300, 'linear', function() {
+            removeMessage: function ($element) {
+                $element.animate({ height: '0px' }, 300, 'linear', function () {
                     $(this).remove();
                 });
             }
         },
-        
+
         directory: {
             load: function (path) {
-                path = path || '/';
-                
+                path = path || $('#directory').attr('data-path');
+
                 var $entries = $('#directory-content-entries').empty();
 
                 html.directory.loadStart();
@@ -286,9 +345,15 @@
                 dropboxClient.client.readdir(path, function (error, entryTitles, data, entries) {
                     if (error) {
                         html.messageBox.showError(error);
-                        
+
                         html.directory.loadEnd();
                         return;
+                    }
+
+                    var isDirectory = path !== '/';
+                    if (isDirectory) {
+                        var parent = $('#directory').attr('data-parent');
+                        html.directory.addItem('..', parent, '', $entries, true);
                     }
 
                     if (!entries.length) {
@@ -296,23 +361,38 @@
                         return;
                     }
 
+                    entries.sort(function(a, b) {
+                        var d = (+a.isFolder) - (+b.isFolder);
+                        if (d !== 0) {
+                            return d;
+                        }
+
+                        return a.name.toLowerCase() > b.name.toLowerCase();
+                    });
+
                     for (var i = entries.length - 1; i >= 0; i--) {
                         var entry = entries[i];
                         if (entry.isFolder) {
-                            continue;
+                            html.directory.addItem(entry.name, entry.path, '', $entries, true);
+                        } else {
+                            html.directory.addItem(entry.name, entry.path, entry.humanSize, $entries);
                         }
-
-                        html.directory.addFile(entry.name, entry.path, entry.humanSize, $entries);
                     }
 
                     html.directory.loadEnd();
                 });
             },
-            addFile: function (name, path, size, $entries) {
+            addItem: function (name, path, size, $entries, isDirectory) {
                 $entries = $entries || $('#directory-content-entries');
 
-                $entries.append('<div class="entry clickable" data-path="' + path + '"><span class="filename">' + name + '</span>' +
-                    ' <span class="filesize">(' + size + ')</span></div><div class="clearfix"></div>');
+                name = isDirectory ? '[' + name + ']' : name;
+                var directoryHtml = isDirectory ? ' data-is-directory="1"' : '';
+                var sizeHtml = size ? ' <span class="filesize">(' + size + ')</span>' : '';
+                var navClass = isDirectory ? ' nav' : '';
+
+                $entries.append('<div class="entry clickable' + navClass + '" data-path="' + path + '" ' + directoryHtml +
+                    '><span class="filename">' + name + '</span>' +
+                    sizeHtml + ' </div><div class="clearfix"></div>');
             },
             toggleExpand: function () {
                 var isExpanded = $('#directory-content-header-text').hasClass('expanded');
@@ -330,13 +410,13 @@
                 $('#directory-content-header-text').html('&#x25BC; Files').removeClass('expanded'); // ▼
                 $('#directory-content').hide();
             },
-            
+
             loadStart: function () {
                 html.directory.setCollapsed();
                 $('#directory-content-refresh').hide();
                 $('#directory-content-spinner').show();
             },
-            
+
             loadEnd: function () {
                 html.directory.setExpanded();
                 $('#directory-content-refresh').show();
@@ -348,7 +428,7 @@
     var wmd = {
         converter: null,
         editor: null,
-        
+
         init: function () {
             $('#wmd').show();
 
@@ -356,12 +436,14 @@
             wmd.editor = wmd.editor || new Markdown.Editor(wmd.converter);
             wmd.editor.run();
             wmd.editor.refreshPreview();
-            
+
             wmd.initBoxHeights();
         },
-        
+
         load: function (path, title) {
-            path = path || $('#wmd-input').attr('data-path');
+            var $wmdInput = $('#wmd-input').show();
+
+            path = path || $wmdInput.attr('data-path');
             if (title) {
                 $('#wmd-file-title').text(title);
             }
@@ -372,21 +454,21 @@
             dropboxClient.client.readFile(path, function (error, data) {
                 if (error) {
                     html.messageBox.showError(error);
-                    
                     wmd.loadEnd();
                     return;
                 }
 
-                var $wmdInput = $('#wmd-input');
+                isDirty = false;
+
                 $wmdInput.val(data).attr('data-path', path);
                 var $wmdPreview = $('#wmd-preview').html('&nbsp;');
 
                 wmd.init();
 
                 $('#wmd-html').val($wmdPreview.html());
-                
+
                 wmd.loadEnd();
-                
+
                 $('html, body').animate({
                     scrollTop: $('#wmd-panel').offset().top
                 }, 500, function () {
@@ -394,7 +476,7 @@
                 });
             });
         },
-        
+
         loadStart: function () {
             $('#wmd-spinner-area').show();
             $('#wmd').hide();
@@ -409,7 +491,7 @@
                 return;
             }
             wmd.isHeightInit = true;
-            
+
             var wmdBoxHeightCss = $('.wmd-box').css('height').replace('px', '');
             var wmdBoxHeight = parseInt(wmdBoxHeightCss, 10);
 
@@ -421,9 +503,9 @@
                 $('#wmd-input').height((boxHeight - buttonBarHeight));
             }
         },
-        
-        rename: function() {
-            
+
+        hide: function () {
+            $('#wmd').hide();
         }
     };
 
@@ -435,9 +517,9 @@
     //html.messageBox.showError({ status: 401 });
     //html.messageBox.showError();
 
-    //dropboxClient.directory.addFile('TestName1', 'TestPath1', '5000 GB');
-    //dropboxClient.directory.addFile('TestName2', 'TestPath2', '5000 GB');
-    //dropboxClient.directory.addFile('TestName3', 'TestPath3', '5000 GB');
+    //dropboxClient.directory.addItem('TestName1', 'TestPath1', '5000 GB');
+    //dropboxClient.directory.addItem('TestName2', 'TestPath2', '5000 GB');
+    //dropboxClient.directory.addItem('TestName3', 'TestPath3', '5000 GB');
 
     html.initListeners();
     html.messageBox.initMessagebox();
@@ -446,7 +528,7 @@
 
     window.scrollTo(0, 1);
     setTimeout(function () {
-        if($(document).scrollTop() < 1) {
+        if ($(document).scrollTop() < 1) {
             window.scrollTo(0, 1);
         }
     }, 1000);
