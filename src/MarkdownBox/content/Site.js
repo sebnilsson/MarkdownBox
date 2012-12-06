@@ -391,7 +391,7 @@
                             return d;
                         }
 
-                        return a.name.toLowerCase() > b.name.toLowerCase();
+                        return a.name.toLowerCase() < b.name.toLowerCase();
                     });
 
                     for (var i = entries.length - 1; i >= 0; i--) {
