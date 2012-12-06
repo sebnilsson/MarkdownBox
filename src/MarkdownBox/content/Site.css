@@ -237,6 +237,9 @@ textarea {
     #wmd-preview {
         width: 97%;
     }
+    #wmd-input, #wmd-html {
+        width: 99%;
+    }
 }
 /* Low-res */
 @media screen and (max-width: 540px) {
