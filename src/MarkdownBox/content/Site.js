@@ -1,4 +1,4 @@
-﻿/// <reference path="~/Libraries/jquery-1.8.2.min.js"/>
+﻿/// <reference path="~/Libraries/jquery-1.8.3.min.js"/>
 /// <reference path="~/Libraries/dropbox.0.6.1.min.js"/>
 /// <reference path="~/Libraries/pagedown/Markdown.Converter.js"/>
 /// <reference path="~/Libraries/pagedown/Markdown.Editor.js"/>
@@ -7,7 +7,21 @@
 (function (window, document, undefined) {
     'use strict';
 
-    var isDirty = false;
+    var isDirty, $main, $directory, $directoryContent, $directoryContentHeaderText, $directoryContentRefresh, $directoryContentEntries,
+        $wmd, $wmdPanel, $wmdInput, $wmdPreview, $wmdHtml, $wmdHtmlToggle, $wmdSpinnerArea;
+    $main = $('#main');
+    $directory = $('#directory');
+    $directoryContent = $('#directory-content');
+    $directoryContentHeaderText = $('#directory-content-header-text');
+    $directoryContentRefresh = $('#directory-content-refresh');
+    $directoryContentEntries = $('#directory-content-entries');
+    $wmd = $('#wmd');
+    $wmdPanel = $('#wmd-panel');
+    $wmdInput = $('#wmd-input');
+    $wmdPreview = $('#wmd-preview');
+    $wmdHtml = $('#wmd-html');
+    $wmdHtmlToggle = $('#wmd-html-toggle');
+    $wmdSpinnerArea = $('#wmd-spinner-area');
 
     var dropboxClient = {
         encodedKey: 'kWWFk4v8E0A=|eLTWCRy1RDt8sJbVCXHYdHGAPrMWpBaGwgLkl6oPQg==',
@@ -22,7 +36,7 @@
 
             dropboxClient.authenticate();
 
-            $('#main').show();
+            $main.show();
         },
 
         authenticate: function () {
@@ -41,7 +55,7 @@
                     html.messageBox.showMessage('You are logged in as <strong>' + userInfo.name + '</strong>', false, 3000);
                 });
 
-                $('#directory').show();
+                $directory.show();
 
                 html.directory.load();
             });
@@ -76,17 +90,17 @@
 
     var html = {
         initListeners: function () {
-            $('#user-logout').click(function () {
-                dropboxClient.client.signOut();
-            });
+            //$('#user-logout').click(function () {
+            //    dropboxClient.client.signOut();
+            //});
 
-            $('#directory-content-header-text').click(function () {
+            $directoryContentHeaderText.click(function () {
                 html.directory.toggleExpand();
             });
-            $('#directory-content-refresh').click(function () {
+            $directoryContentRefresh.click(function () {
                 html.directory.load();
             });
-            $('#directory-content-entries').on('click', '.entry', function () {
+            $directoryContentEntries.on('click', '.entry', function () {
                 var $this = $(this);
                 var path = $this.attr('data-path');
                 var isDirectory = !!$(this).attr('data-is-directory');
@@ -94,9 +108,9 @@
                 if (isDirectory) {
                     var lastIndex = path.lastIndexOf('/');
                     var parentDirectory = path.slice(0, lastIndex) || '/';
-                    $('#directory').attr('data-parent', parentDirectory);
+                    $directory.attr('data-parent', parentDirectory);
 
-                    $('#directory').attr('data-path', path);
+                    $directory.attr('data-path', path);
                     html.directory.load(path);
                     return;
                 }
@@ -152,7 +166,7 @@
                 }
             });
 
-            $('#wmd-input').keyup(function () {
+            $wmdInput.keyup(function () {
                 isDirty = true;
             });
 
@@ -168,7 +182,7 @@
                         }
                     }
 
-                    var filePath = $('#wmd-input').attr('data-path');
+                    var filePath = $wmdInput.attr('data-path');
                     var fileName = getFileName(filePath);
                     $('#rename-title').text(fileName);
                     $('#modal-textbox-rename input').val(fileName);
@@ -187,7 +201,7 @@
                 wmd.loadStart();
                 html.directory.setCollapsed();
 
-                var filePath = $('#wmd-input').attr('data-path');
+                var filePath = $wmdInput.attr('data-path');
                 dropboxClient.client.delete(filePath, function (error, stat) {
                     if (error) {
                         html.messageBox.showError(error);
@@ -243,7 +257,7 @@
                 html.directory.setCollapsed();
                 wmd.loadStart();
 
-                var fromPath = $('#wmd-input').attr('data-path');
+                var fromPath = $wmdInput.attr('data-path');
                 var toPath = getFilePath(fileName);
                 dropboxClient.client.move(fromPath, toPath, function (error, stat) {
                     if (error) {
@@ -260,13 +274,6 @@
                 $.fancybox.close();
             });
 
-            var $wmdHtml = $('#wmd-html');
-            var $wmdInput = $('#wmd-input');
-            var $wmdPreview = $('#wmd-preview');
-            $wmdInput.on('keyup', function () {
-                $wmdHtml.val($wmdPreview.html());
-            });
-
             $wmdHtml.click(function () {
                 $wmdHtml.select();
             });
@@ -274,6 +281,15 @@
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
+            });
+
+            $wmdHtmlToggle.click(function () {
+                var isExpanded = $(this).hasClass('expanded');
+                if (isExpanded) {
+                    wmd.setHtmlCollapsed();
+                } else {
+                    wmd.setHtmlExpanded();
+                }
             });
 
             $('.click-once').click(function () {
@@ -344,9 +360,9 @@
 
         directory: {
             load: function (path) {
-                path = path || $('#directory').attr('data-path');
+                path = path || $directory.attr('data-path');
 
-                var $entries = $('#directory-content-entries').empty();
+                var $entries = $directoryContentEntries.empty();
 
                 html.directory.loadStart();
 
@@ -360,7 +376,7 @@
 
                     var isDirectory = path !== '/';
                     if (isDirectory) {
-                        var parent = $('#directory').attr('data-parent');
+                        var parent = $directory.attr('data-parent');
                         html.directory.addItem('..', parent, '', $entries, true);
                     }
 
@@ -391,7 +407,7 @@
                 });
             },
             addItem: function (name, path, size, $entries, isDirectory) {
-                $entries = $entries || $('#directory-content-entries');
+                $entries = $entries || $directoryContentEntries;
 
                 name = isDirectory ? '[' + name + ']' : name;
                 var directoryHtml = isDirectory ? ' data-is-directory="1"' : '';
@@ -403,7 +419,7 @@
                     sizeHtml + ' </div><div class="clearfix"></div>');
             },
             toggleExpand: function () {
-                var isExpanded = $('#directory-content-header-text').hasClass('expanded');
+                var isExpanded = $directoryContentHeaderText.hasClass('expanded');
                 if (isExpanded) {
                     html.directory.setCollapsed();
                 } else {
@@ -411,23 +427,23 @@
                 }
             },
             setExpanded: function () {
-                $('#directory-content-header-text').html('&#x25B2; Files').addClass('expanded'); // ▲
-                $('#directory-content').show();
+                $directoryContentHeaderText.html('&#x25B2; Files').addClass('expanded'); // ▲
+                $directoryContent.show();
             },
             setCollapsed: function () {
-                $('#directory-content-header-text').html('&#x25BC; Files').removeClass('expanded'); // ▼
-                $('#directory-content').hide();
+                $directoryContentHeaderText.html('&#x25BC; Files').removeClass('expanded'); // ▼
+                $directoryContent.hide();
             },
 
             loadStart: function () {
                 html.directory.setCollapsed();
-                $('#directory-content-refresh').hide();
+                $directoryContentRefresh.hide();
                 $('#directory-content-spinner').show();
             },
 
             loadEnd: function () {
                 html.directory.setExpanded();
-                $('#directory-content-refresh').show();
+                $directoryContentRefresh.show();
                 $('#directory-content-spinner').hide();
             }
         }
@@ -438,7 +454,7 @@
         editor: null,
 
         init: function () {
-            $('#wmd').show();
+            $wmd.show();
 
             wmd.converter = wmd.converter || Markdown.getSanitizingConverter();
             wmd.editor = wmd.editor || new Markdown.Editor(wmd.converter);
@@ -449,7 +465,7 @@
         },
 
         load: function (path, title) {
-            var $wmdInput = $('#wmd-input').show();
+            $wmdInput.show();
 
             path = path || $wmdInput.attr('data-path');
             if (title) {
@@ -458,6 +474,8 @@
 
             html.directory.setCollapsed();
             wmd.loadStart();
+            wmd.setHtmlCollapsed();
+            $wmdHtml.val('');
 
             dropboxClient.client.readFile(path, function (error, data) {
                 if (error) {
@@ -469,16 +487,14 @@
                 isDirty = false;
 
                 $wmdInput.val(data).attr('data-path', path);
-                var $wmdPreview = $('#wmd-preview').html('&nbsp;');
+                $wmdPreview.html('&nbsp;');
 
                 wmd.init();
-
-                $('#wmd-html').val($wmdPreview.html());
 
                 wmd.loadEnd();
 
                 $('html, body').animate({
-                    scrollTop: $('#wmd-panel').offset().top
+                    scrollTop: $wmdPanel.offset().top
                 }, 500, function () {
                     $wmdInput.focus();
                 });
@@ -486,12 +502,12 @@
         },
 
         loadStart: function () {
-            $('#wmd-spinner-area').show();
-            $('#wmd').hide();
+            $wmdSpinnerArea.show();
+            $wmd.hide();
         },
         loadEnd: function () {
-            $('#wmd-spinner-area').hide();
-            $('#wmd').show();
+            $wmdSpinnerArea.hide();
+            $wmd.show();
         },
         isHeightInit: false,
         initBoxHeights: function () {
@@ -508,17 +524,17 @@
                 var boxHeight = (windowHeight - 2);
                 $('.wmd-box').height(boxHeight);
                 var buttonBarHeight = $('#wmd-button-bar').height();
-                $('#wmd-input').height((boxHeight - buttonBarHeight));
+                $wmdInput.height((boxHeight - buttonBarHeight));
             }
         },
 
         hide: function () {
-            $('#wmd').hide();
+            $wmd.hide();
         },
 
         saveFile: function () {
-            var path = $('#wmd-input').attr('data-path');
-            var content = $('#wmd-input').val();
+            var path = $wmdInput.attr('data-path');
+            var content = $wmdInput.val();
 
             var $buttons = $('#wmd button, #wmd input').hide();
             var $navigation = $('#directory, #file-rename, #file-delete').hide();
@@ -532,18 +548,36 @@
         },
 
         autoSaveTimeoutId: 0,
-        autoSave: function() {
+        autoSave: function () {
             clearTimeout(wmd.autoSaveTimeoutId);
 
             wmd.autoSaveTimeoutId = setTimeout(function () {
                 wmd.saveFile();
-            }, 20000);
+            }, 15000);
         },
         enableAutoSave: function () {
-            $('#wmd-input').on('keyup', wmd.autoSave);
+            $wmdInput.on('keyup', wmd.autoSave);
         },
         disableAutoSave: function () {
-            $('#wmd-input').off('keyup', wmd.autoSave);
+            $wmdInput.off('keyup', wmd.autoSave);
+        },
+
+        updateHtml: function () {
+            $wmdHtml.val($wmdPreview.html());
+        },
+        setHtmlExpanded: function () {
+            $wmdInput.on('keyup', wmd.updateHtml);
+            wmd.updateHtml();
+
+            $wmdHtmlToggle.html('&#x25B2; Hide HTML').addClass('expanded'); // ▲
+            $wmdHtml.show();
+
+        },
+        setHtmlCollapsed: function () {
+            $wmdInput.off('keyup', wmd.updateHtml);
+
+            $wmdHtmlToggle.html('&#x25BC; Show HTML').removeClass('expanded'); // ▼
+            $wmdHtml.hide();
         }
     };
 
