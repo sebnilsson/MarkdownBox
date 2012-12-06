@@ -226,6 +226,10 @@ textarea {
     border: 1px solid #555;
 }
 
+#modal-textbox-add input, #modal-textbox-rename input {
+    width: 99%;
+}
+
 /* Smartphone */
 @media screen and (max-width: 320px) {
     body {
