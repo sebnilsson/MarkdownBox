@@ -71,6 +71,10 @@ a, a:link, a:hover, a:active, a:visited {
     padding: 0.5em 0;
     text-align: center;
 }
+#footer a, #footer a:link, #footer a:hover, #footer a:active, #footer a:visited {
+    color: #ccc;
+    text-decoration: none;
+}
 
 #wmd-panel, #wmd-preview, #wmd-html {
     margin: 0.5em 0;
@@ -224,10 +228,6 @@ textarea {
 }
 #user-logout {
     border: 1px solid #555;
-}
-
-#modal-textbox-add input, #modal-textbox-rename input {
-    width: 98%;
 }
 
 /* Smartphone */

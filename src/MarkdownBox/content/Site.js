@@ -141,9 +141,9 @@
             $('#auto-save').click(function () {
                 var isChecked = $(this).is(':checked');
                 if (isChecked) {
-                    wmd.enableAutoSave();
+                    wmd.autoSave.enable();
                 } else {
-                    wmd.disableAutoSave();
+                    wmd.autoSave.disable();
                 }
             });
 
@@ -547,37 +547,59 @@
             });
         },
 
-        autoSaveTimeoutId: 0,
-        autoSave: function () {
-            clearTimeout(wmd.autoSaveTimeoutId);
+        preview: {
+            update: function() {
+                $wmdHtml.val($wmdPreview.html());
+            },
+            setExpanded: function () {
+                $wmdInput.on('keyup', wmd.html.update);
+                wmd.html.update();
 
-            wmd.autoSaveTimeoutId = setTimeout(function () {
-                wmd.saveFile();
-            }, 15000);
-        },
-        enableAutoSave: function () {
-            $wmdInput.on('keyup', wmd.autoSave);
-        },
-        disableAutoSave: function () {
-            $wmdInput.off('keyup', wmd.autoSave);
+                $wmdHtmlToggle.html('&#x25B2; Hide HTML').addClass('expanded'); // ▲
+                $wmdHtml.show();
+            },
+            setCollapsed: function () {
+                $wmdInput.off('keyup', wmd.html.update);
+
+                $wmdHtmlToggle.html('&#x25BC; Show HTML').removeClass('expanded'); // ▼
+                $wmdHtml.hide();
+            }
         },
 
-        updateHtml: function () {
-            $wmdHtml.val($wmdPreview.html());
+        html: {
+            update: function() {
+                $wmdHtml.val($wmdPreview.html());
+            },
+            setExpanded: function () {
+                $wmdInput.on('keyup', wmd.html.update);
+                wmd.html.update();
+
+                $wmdHtmlToggle.html('&#x25B2; Hide HTML').addClass('expanded'); // ▲
+                $wmdHtml.show();
+            },
+            setCollapsed: function () {
+                $wmdInput.off('keyup', wmd.html.update);
+
+                $wmdHtmlToggle.html('&#x25BC; Show HTML').removeClass('expanded'); // ▼
+                $wmdHtml.hide();
+            }
         },
-        setHtmlExpanded: function () {
-            $wmdInput.on('keyup', wmd.updateHtml);
-            wmd.updateHtml();
+        
+        autoSave: {
+            timeoutId: 0,
+            perform: function () {
+                clearTimeout(wmd.autoSave.timeoutId);
 
-            $wmdHtmlToggle.html('&#x25B2; Hide HTML').addClass('expanded'); // ▲
-            $wmdHtml.show();
-
-        },
-        setHtmlCollapsed: function () {
-            $wmdInput.off('keyup', wmd.updateHtml);
-
-            $wmdHtmlToggle.html('&#x25BC; Show HTML').removeClass('expanded'); // ▼
-            $wmdHtml.hide();
+                wmd.autoSave.timeoutId = setTimeout(function () {
+                    wmd.saveFile();
+                }, 15000);
+            },
+            enable: function () {
+                $wmdInput.on('keyup', wmd.autoSave.perform);
+            },
+            disable: function () {
+                $wmdInput.off('keyup', wmd.autoSave.perform);
+            }
         }
     };
 
