@@ -286,9 +286,9 @@
             $wmdHtmlToggle.click(function () {
                 var isExpanded = $(this).hasClass('expanded');
                 if (isExpanded) {
-                    wmd.setHtmlCollapsed();
+                    wmd.html.setCollapsed();
                 } else {
-                    wmd.setHtmlExpanded();
+                    wmd.html.setExpanded();
                 }
             });
 
@@ -474,7 +474,7 @@
 
             html.directory.setCollapsed();
             wmd.loadStart();
-            wmd.setHtmlCollapsed();
+            wmd.html.setCollapsed();
             $wmdHtml.val('');
 
             dropboxClient.client.readFile(path, function (error, data) {
