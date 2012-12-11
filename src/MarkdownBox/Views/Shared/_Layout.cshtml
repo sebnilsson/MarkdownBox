@@ -31,6 +31,7 @@
     <title>@Html.Encode(pageTitle)</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
     
     <link rel="shortcut icon" href="~/favicon.ico">
 
@@ -54,7 +55,7 @@
     
     <div id="container">
         <header id="top">
-            MarkdownBox
+            <a href="/">MarkdownBox</a>
         </header>
 
         <div id="main" class="no-display">
@@ -83,11 +84,25 @@
         window.Dropbox || document.write('<script src="@Url.Content("~/libraries/dropbox.0.6.1.min.js")"><\/script>');
 
         var basePath = '@Url.Content("~/")';
+        
+        var addToHomeConfig = {
+            animationIn: 'bubble',
+            animationOut: 'drop',
+            autostart: true,
+            expire: 15,
+            lifespan: 15000,
+            returningVisitor: false,
+            touchIcon: true
+        };
     </script>
         
     @RenderSection("BottomScripts", false)
     
     @Js("bundled-site")
+    
+    <script>
+        addToHome.show();
+    </script>
     
     @*<script type="text/javascript">
         var _gaq = _gaq || [];
