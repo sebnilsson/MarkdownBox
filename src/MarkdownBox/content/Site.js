@@ -5,6 +5,7 @@
 /// <reference path="~/Libraries/pagedown/Markdown.Sanitizer.js"/>
 /// <reference path="~/Libraries/google-prettify/prettify.js"/>
 /// <reference path="~/Libraries/jquery.ba-bbq.js"/>
+/// <reference path="~/Libraries/jquery.hotkeys.js"/>
 
 (function(window, document, undefined) {
     'use strict';
@@ -224,6 +225,12 @@
                     wmd.loadEnd();
                     wmd.hide();
                 });
+            });
+
+            $wmdInput.bind('keydown.ctrl_s keydown.cmd_s keydown.alt_s', function (e) {
+                wmd.saveFile();
+                e.preventDefault();
+                return false;
             });
 
             var validateModalInput = function(fileName) {

@@ -166,6 +166,7 @@
     <Content Include="libraries\google-prettify\sunburst.css" />
     <Content Include="libraries\jquery-1.8.3.min.js" />
     <Content Include="libraries\jquery.ba-bbq.js" />
+    <Content Include="libraries\jquery.hotkeys.js" />
     <Content Include="libraries\Modernizr.2.6.2.custom.js" />
     <Content Include="libraries\Modernizr.2.6.2.dev.js" />
     <Content Include="libraries\Normalize.css" />

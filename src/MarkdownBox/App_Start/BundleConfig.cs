@@ -29,6 +29,7 @@ namespace MarkdownBox
                 .Add("~/libraries/fancybox/jquery.fancybox.pack.js")
                 .Add("~/libraries/google-prettify/prettify.js")
                 .Add("~/libraries/add2home/add2home.js")
+                .Add("~/libraries/jquery.hotkeys.js")
                 .Add("~/Content/Site.js")
                 .AsCached("bundled-site", "~/assets/js/bundled-site.js");
         }
