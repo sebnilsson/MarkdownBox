@@ -33,10 +33,7 @@ pre.prettyprint, code.prettyprint {
         -ms-border-radius: 6px;
         -khtml-border-radius: 6px;
         border-radius: 6px;
-}
-
-p code {
-    padding: 0.15em 0.4em;
+    background-color: #ccc;
 }
 
 #message-box {
@@ -102,7 +99,7 @@ p code {
     text-decoration: none;
 }
 
-#wmd-panel, #wmd-preview, #wmd-html {
+#wmd-panel, #wmd-pretty-preview, #wmd-html {
     margin: 0.5em 0;
 }
 
@@ -126,7 +123,7 @@ p code {
     overflow: hidden;
 }
 
-#wmd-input, #wmd-preview, #wmd-html {
+#wmd-input, #wmd-pretty-preview, #wmd-html {
     height: 400px;
 }
 
@@ -147,7 +144,7 @@ p code {
     display: none;
 }
 
-#wmd-preview {
+#wmd-pretty-preview {
     border: 1px solid #555;
 
     font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
@@ -159,10 +156,10 @@ p code {
     padding: 0.25em;
     width: 99%;
 }
-#wmd-preview > p:first-of-type {
+#wmd-pretty-preview > p:first-of-type {
     margin-top: 0.25em;
 }
-#wmd-preview > p:last-of-type {
+#wmd-pretty-preview > p:last-of-type {
     margin-bottom: 0.25em;
 }
 
@@ -264,7 +261,7 @@ textarea {
     #main {
         padding: 0.75em 2px;
     }
-    #wmd-preview {
+    #wmd-pretty-preview {
         width: 97%;
     }
     #wmd-input, #wmd-html {
@@ -279,7 +276,7 @@ textarea {
     #main {
         padding: 0.75em 0.25em;
     }
-    #wmd-preview {
+    #wmd-pretty-preview {
         width: 98%;
     }
 }

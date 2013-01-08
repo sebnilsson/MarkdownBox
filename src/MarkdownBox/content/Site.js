@@ -11,7 +11,7 @@
     'use strict';
 
     var isDirty, $main, $directory, $directoryContent, $directoryContentHeaderText, $directoryContentRefresh, $directoryContentEntries,
-        $wmd, $wmdPanel, $wmdInput, $wmdPreview, $wmdHtml, $wmdHtmlToggle, $wmdSpinnerArea;
+        $wmd, $wmdPanel, $wmdInput, $wmdPreview, $wmdPrettyPreview, $wmdHtml, $wmdHtmlToggle, $wmdSpinnerArea;
     $main = $('#main');
     $directory = $('#directory');
     $directoryContent = $('#directory-content');
@@ -22,6 +22,7 @@
     $wmdPanel = $('#wmd-panel');
     $wmdInput = $('#wmd-input');
     $wmdPreview = $('#wmd-preview');
+    $wmdPrettyPreview = $('#wmd-pretty-preview');
     $wmdHtml = $('#wmd-html');
     $wmdHtmlToggle = $('#wmd-html-toggle');
     $wmdSpinnerArea = $('#wmd-spinner-area');
@@ -180,6 +181,8 @@
 
             $wmdInput.keyup(function() {
                 isDirty = true;
+
+                wmd.preview.updatePretty();
             });
 
             $('#file-rename').fancybox({
@@ -227,7 +230,7 @@
                 });
             });
 
-            $wmdInput.bind('keydown.ctrl_s keydown.cmd_s keydown.alt_s', function (e) {
+            $wmdInput.bind('keydown.ctrl_s keydown.cmd_s keydown.alt_s', function(e) {
                 wmd.saveFile();
                 e.preventDefault();
                 return false;
@@ -478,9 +481,12 @@
             wmd.editor = wmd.editor || new Markdown.Editor(wmd.converter);
             wmd.editor.run();
             wmd.editor.refreshPreview();
+            
+            wmd.preview.updatePretty();
 
-            wmd.initBoxHeights();
             wmd.initPretty();
+            
+            wmd.initBoxHeights();
         },
 
         load: function(path, title) {
@@ -548,11 +554,7 @@
         },
 
         initPretty: function() {
-            $('pre:not(".no-prettyprint"), code:not(".no-prettyprint")').addClass('prettyprint');
-
-            prettyPrint(function() {
-
-            });
+            wmd.preview.lazyPrettify(1);
         },
 
         hide: function() {
@@ -590,6 +592,21 @@
 
                 $wmdHtmlToggle.html('&#x25BC; Show HTML').removeClass('expanded'); // ▼
                 $wmdHtml.hide();
+            },
+            updatePretty: function() {
+                $wmdPrettyPreview.html($wmdPreview.html());
+
+                wmd.preview.lazyPrettify();
+            },
+            lazyPrettifyTimeoutId: 0,
+            lazyPrettify: function(timeout) {
+                timeout = timeout || 500;
+                
+                clearTimeout(wmd.preview.lazyPrettifyTimeoutId);
+                wmd.preview.lazyPrettifyTimeoutId = setTimeout(function() {
+                    $('pre:not(".no-prettyprint"), code:not(".no-prettyprint")', $wmdPrettyPreview).addClass('prettyprint');
+                    prettyPrint();
+                }, timeout);
             }
         },
 
