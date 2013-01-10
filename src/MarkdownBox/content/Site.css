@@ -124,6 +124,7 @@ pre.prettyprint, code.prettyprint {
 }
 
 #wmd-input, #wmd-pretty-preview, #wmd-html {
+    font-size: 0.9em;
     height: 400px;
 }
 
