@@ -27,13 +27,17 @@ pre.prettyprint {
     width: auto;
 }
 pre.prettyprint, code.prettyprint {
-        -moz-border-radius: 6px;
-        -webkit-border-radius: 6px;
-        -o-border-radius: 6px;
-        -ms-border-radius: 6px;
-        -khtml-border-radius: 6px;
-        border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    -o-border-radius: 6px;
+    -ms-border-radius: 6px;
+    -khtml-border-radius: 6px;
+    border-radius: 6px;
     background-color: #ccc;
+}
+
+p code {
+    padding: 0 0.25em;
 }
 
 #message-box {
@@ -185,6 +189,7 @@ textarea {
 
 #directory {
     border: 1px solid #555;
+    font-size: 0.9em;
     margin: 0 auto 1em;
     max-width: 400px;
 }
@@ -193,6 +198,7 @@ textarea {
     padding: 0.25em;
 }
 #directory-content-entries {
+    font-size: 0.9em;
     padding: 0.25em;
 }
 #directory-content-entries.no-entries {
