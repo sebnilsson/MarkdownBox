@@ -152,7 +152,7 @@
     <Content Include="Global.asax" />
     <Content Include="libraries\add2home\add2home.css" />
     <Content Include="libraries\add2home\add2home.js" />
-    <Content Include="libraries\dropbox.0.6.1.min.js" />
+    <Content Include="libraries\dropbox.0.9.0.min.js" />
     <Content Include="libraries\fancybox\blank.gif" />
     <Content Include="libraries\fancybox\fancybox_loading.gif" />
     <Content Include="libraries\fancybox\fancybox_overlay.png" />
