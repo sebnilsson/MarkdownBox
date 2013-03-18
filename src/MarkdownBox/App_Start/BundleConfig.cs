@@ -9,8 +9,9 @@ namespace MarkdownBox
             // SiteStyles
             Bundle.Css()
                 .Add("~/Libraries/Normalize.css")
+                .Add("~/Libraries/bootstrap/css/bootstrap.css")
                 .Add("~/Libraries/pagedown/Markdown.css")
-                .Add("~/libraries/fancybox/jquery.fancybox.css")
+                //.Add("~/libraries/fancybox/jquery.fancybox.css")
                 //.Add("~/libraries/google-prettify/sons-of-obsidian.css")
                 .Add("~/libraries/google-prettify/prettify.css")
                 .Add("~/libraries/add2home/add2home.css")
@@ -27,10 +28,11 @@ namespace MarkdownBox
                 .Add("~/Libraries/pagedown/Markdown.Converter.js")
                 .Add("~/Libraries/pagedown/Markdown.Sanitizer.js")
                 .Add("~/Libraries/pagedown/Markdown.Editor.js")
-                .Add("~/libraries/fancybox/jquery.fancybox.pack.js")
+                //.Add("~/libraries/fancybox/jquery.fancybox.js")
                 .Add("~/libraries/google-prettify/prettify.js")
                 .Add("~/libraries/add2home/add2home.js")
                 .Add("~/libraries/jquery.hotkeys.js")
+                //.Add("~/Libraries/bootstrap/js/bootstrap.js")
                 .Add("~/Content/Site.js")
                 .AsCached("bundled-site", "~/assets/js/bundled-site.js");
         }

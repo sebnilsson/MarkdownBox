@@ -198,10 +198,10 @@ textarea {
     padding: 0.25em;
 }
 #directory-content-entries {
-    font-size: 0.9em;
+    /*font-size: 0.9em;*/
     padding: 0.25em;
 }
-#directory-content-entries.no-entries {
+#directory-content-entries .no-files {
     background-color: #ccc;
     font-style: italic;
 }
@@ -224,19 +224,20 @@ textarea {
     font-weight: bold;
 }
 #directory .filesize {
-    font-style: italic;
+    font-size: 0.75em;
+    /*font-style: italic;*/
     /*float: right;*/
 }
 #directory-content-refresh, #directory-content-spinner {
-    background-position: center center;
-    background-repeat: no-repeat;
+    /*background-position: center center;
+    background-repeat: no-repeat;*/
     height: 16px;
     width: 16px;
     float: right;
 }
-#directory-content-refresh {
+/*#directory-content-refresh {
     background-image: url('refresh.png');
-}
+}*/
 #directory-content-spinner {
     background-image: url('spinner_16x16.gif');
 }

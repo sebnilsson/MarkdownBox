@@ -19,11 +19,11 @@
 }
 
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie10 lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie10 lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie10 lt-ie9"> <![endif]-->
-<!--[if IE 9]>         <html class="no-js lt-ie10"> <![endif]-->
-<!--[if gt IE 9]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7]>      <html class="no-js lt-ie10 lt-ie9 lt-ie8 lt-ie7" ng-app> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie10 lt-ie9 lt-ie8" ng-app> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie10 lt-ie9" ng-app> <![endif]-->
+<!--[if IE 9]>         <html class="no-js lt-ie10" ng-app> <![endif]-->
+<!--[if gt IE 9]><!--> <html class="no-js" ng-app> <!--<![endif]-->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -45,7 +45,7 @@
         var _gaq = _gaq || []; _gaq.push(["_setAccount", "UA-36224162-1"]), _gaq.push(["_trackPageview"]), function () { var n = document.createElement("script"), t; n.type = "text/javascript", n.async = true, n.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js", t = document.getElementsByTagName("script")[0], t.parentNode.insertBefore(n, t) }();
     </script>
 </head>
-<body class="@bodyClass">
+<body class="@bodyClass" ng-controller="MarkdownBox">
     <div id="message-box">
         <!--[if lt IE 10]>
             <div>
@@ -55,6 +55,9 @@
         <noscript>
             <strong>This site will only work with Javascript</strong>. Please <a href="http://www.activatejavascript.org/">activate JavaScript</a>.
         </noscript>
+        <div ng-repeat="message in messageBox.messages" ng-click="messageBox.removeMessage(message)"
+             ng-class="{ true: 'error', false: '' }[message.isError]" ng-bind-html-unsafe="message.text"
+             title="Click to dismiss" class="clickable"></div>
     </div>
     
     <div id="container">
@@ -62,30 +65,32 @@
             <a href="/">MarkdownBox</a>
         </header>
 
-        <div id="main" class="no-display">
+        <div id="main">
             @RenderBody()
         </div>
 
         <footer id="footer"><a href="http://sebnilsson.com">Copyright &#169; @DateTime.Today.Year Sebastian Nilsson</a></footer>
     </div>
     
-    <div id="modal-textbox-add" class="no-display">
+    @*<div id="modal-textbox-add" ng-show="file.isInAddFileMode">
         Add new file<br />
-        <input type="text" style="width: 97%;" />
-        <button>Add</button>
+        <input type="text" ng-model="file.addFileText" style="width: 97%;" />
+        <button ng-click="file.add()">Add</button>
     </div>
     
-    <div id="modal-textbox-rename" class="no-display">
+    <div id="modal-textbox-rename" ng-show="file.isInRenameFileMode">
         Rename file '<span id="rename-title"></span>'<br />
-        <input type="text" style="width: 97%;" />
-        <button>Rename</button>
-    </div>
+        <input type="text" ng-model="file.renameFileText" style="width: 97%;" />
+        <button ng-click="file.rename()">Rename</button>
+    </div>*@
     
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.9.0/dropbox.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.1.3/angular.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.9.1/dropbox.min.js"></script>
     <script>
-        window.jQuery || document.write('<script src="@Url.Content("~/libraries/jquery-1.8.3.min.js")"><\/script>');
-        window.Dropbox || document.write('<script src="@Url.Content("~/libraries/dropbox.0.9.0.min.js")"><\/script>');
+        window.jQuery || document.write('<script src="@Url.Content("~/libraries/jquery-1.9.1.min.js")"><\/script>');
+        window.angular || document.write('<script src="@Url.Content("~/libraries/angular-1.1.3.min.js")"><\/script>');
+        window.Dropbox || document.write('<script src="@Url.Content("~/libraries/dropbox.0.9.1.min.js")"><\/script>');
 
         var basePath = '@Url.Content("~/")';
         
@@ -99,21 +104,9 @@
             touchIcon: true
         };
     </script>
-        
+    
     @RenderSection("BottomScripts", false)
     
     @Js("bundled-site")
-    
-    @*<script type="text/javascript">
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-XXXXXXX-X']);
-        _gaq.push(['_trackPageview']);
-
-        (function () {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
-    </script>*@
 </body>
 </html>

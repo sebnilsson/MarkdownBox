@@ -1,5 +1,6 @@
-﻿/// <reference path="~/Libraries/jquery-1.8.3.min.js"/>
-/// <reference path="~/Libraries/dropbox.0.6.1.min.js"/>
+﻿/// <reference path="~/Libraries/jquery-1.9.1.min.js"/>
+/// <reference path="~/Libraries/angular-1.1.3.min.js"/>
+/// <reference path="~/Libraries/dropbox.0.9.1.min.js"/>
 /// <reference path="~/Libraries/pagedown/Markdown.Converter.js"/>
 /// <reference path="~/Libraries/pagedown/Markdown.Editor.js"/>
 /// <reference path="~/Libraries/pagedown/Markdown.Sanitizer.js"/>
@@ -7,667 +8,504 @@
 /// <reference path="~/Libraries/jquery.ba-bbq.js"/>
 /// <reference path="~/Libraries/jquery.hotkeys.js"/>
 
-(function(window, document, undefined) {
+MarkdownBox = (function (window, document, undefined) {
     'use strict';
 
-    var isDirty, $main, $directory, $directoryContent, $directoryContentHeaderText, $directoryContentRefresh, $directoryContentEntries,
-        $wmd, $wmdPanel, $wmdInput, $wmdPreview, $wmdPrettyPreview, $wmdHtml, $wmdHtmlToggle, $wmdSpinnerArea;
-    $main = $('#main');
-    $directory = $('#directory');
-    $directoryContent = $('#directory-content');
-    $directoryContentHeaderText = $('#directory-content-header-text');
-    $directoryContentRefresh = $('#directory-content-refresh');
-    $directoryContentEntries = $('#directory-content-entries');
-    $wmd = $('#wmd');
-    $wmdPanel = $('#wmd-panel');
-    $wmdInput = $('#wmd-input');
-    $wmdPreview = $('#wmd-preview');
-    $wmdPrettyPreview = $('#wmd-pretty-preview');
-    $wmdHtml = $('#wmd-html');
-    $wmdHtmlToggle = $('#wmd-html-toggle');
-    $wmdSpinnerArea = $('#wmd-spinner-area');
-
-    var dropboxClient = {
-        encodedKey: 'kWWFk4v8E0A=|eLTWCRy1RDt8sJbVCXHYdHGAPrMWpBaGwgLkl6oPQg==',
-        client: null,
-
-        init: function() {
-            dropboxClient.client = new Dropbox.Client({
-                key: dropboxClient.encodedKey,
-                sandbox: true
-            });
-            dropboxClient.client.authDriver(new Dropbox.Drivers.Redirect({ rememberUser: true }));
-
-            dropboxClient.authenticate();
-
-            $main.show();
+    var cookies = {
+        setItem: function(name, value, days) {
+            var date = new Date();
+            date.setDate(date.getDate() + days);
+            var cookieValue = escape(value) + ((days == null) ? '' : '; expires=' + date.toUTCString());
+            document.cookie = name + "=" + cookieValue;
         },
-
-        authenticate: function() {
-            dropboxClient.client.authenticate(function(error) {
-                if (error) {
-                    html.messageBox.showError(error);
-                    return;
+        getItem: function(name) {
+            var i, key, value, cookieList = document.cookie.split(";");
+            for (i = 0; i < cookieList.length; i++) {
+                key = cookieList[i].substr(0, cookieList[i].indexOf("="));
+                value = cookieList[i].substr(cookieList[i].indexOf("=") + 1);
+                key = key.replace(/^\s+|\s+$/g, "");
+                if (key == name) {
+                    return unescape(value);
                 }
+            }
+        }
+    };
 
-                dropboxClient.client.getUserInfo(function(error, userInfo) {
-                    if (error) {
-                        html.messageBox.showError(error);
-                        return;
-                    }
+    var validateFileName = function (fileName) {
+        if (!fileName) {
+            alert('File must have a name!');
+            return false;
+        }
+        return true;
+    };
+    var getParentPath = function(path) {
+        var lastIndex = path.lastIndexOf('/');
+        var parent = path.slice(0, lastIndex) || '/';
+        return parent;
+    };
+    var getFullPath = function(directory, path) {
+        var fullPath = (directory + '/' + path).replace('//', '/').replace('//', '/');
+        return fullPath;
+    };
 
-                    html.messageBox.showMessage('You are logged in as <strong>' + userInfo.name + '</strong>', false, 3000);
+    var MarkdownBox = function ($scope) {
+        var $wmdInput = $('#wmd-input'),
+            $wmdPanel = $('#wmd-panel'),
+            $wmdPreview = $('#wmd-preview'),
+            $wmdPrettyPreview = $('#wmd-pretty-preview'),
+            $wmdHtml = $('#wmd-html');
+        
+        var dropboxClient = {
+            encodedKey: 'kWWFk4v8E0A=|eLTWCRy1RDt8sJbVCXHYdHGAPrMWpBaGwgLkl6oPQg==',
+            client: null,
+
+            init: function () {
+                dropboxClient.client = new Dropbox.Client({
+                    key: dropboxClient.encodedKey,
+                    sandbox: true
                 });
+                dropboxClient.client.authDriver(new Dropbox.Drivers.Redirect({ rememberUser: true }));
+                dropboxClient.authenticate();
+            },
 
-                $directory.show();
-
-                html.directory.load();
-            });
-        },
-
-        saveFile: function(path, content, callback) {
-            dropboxClient.client.writeFile(path, content, function(error, stat) {
-                if (error) {
-                    html.messageBox.showError(error);
-                } else {
-                    html.messageBox.showMessage("File saved as revision " + stat.versionTag);
-                }
-
-                if (typeof(callback) === 'function') {
-                    callback();
-                }
-            });
-        }
-    };
-
-    var getFilePath = function(fileName) {
-        return '/' + fileName + '.txt';
-    };
-    var getFileName = function(filePath) {
-        var trimmed = $.trim(filePath);
-        if (!trimmed) {
-            return '';
-        }
-
-        return trimmed.slice(1, trimmed.length - 4);
-    };
-    var getDirectoryName = function(filePath) {
-        var trimmed = $.trim(filePath);
-        if (!trimmed) {
-            return '/';
-        }
-
-        var slashIndex = trimmed.lastIndexOf('/');
-        return trimmed.slice(0, slashIndex + 1) || '/';
-    };
-
-    var html = {
-        initListeners: function() {
-            //$('#user-logout').click(function () {
-            //    dropboxClient.client.signOut();
-            //});
-
-            $directoryContentHeaderText.click(function() {
-                html.directory.toggleExpand();
-            });
-            $directoryContentRefresh.click(function() {
-                html.directory.load();
-            });
-            $directoryContentEntries.on('click', '.entry', function() {
-                var $this = $(this);
-                var path = $this.attr('data-path');
-                var isDirectory = !!$(this).attr('data-is-directory');
-
-                if (isDirectory) {
-                    var lastIndex = path.lastIndexOf('/');
-                    var parentDirectory = path.slice(0, lastIndex) || '/';
-                    $directory.attr('data-parent', parentDirectory);
-
-                    $directory.attr('data-path', path);
-                    html.directory.load(path);
-                    return;
-                }
-
-                if (isDirty) {
-                    var result = html.confirmChangesLost('Are you sure you want to change file?');
-                    if (!result) {
+            authenticate: function () {
+                dropboxClient.client.authenticate(function (authenticateError) {
+                    if (authenticateError) {
+                        $scope.messageBox.addError(authenticateError);
                         return;
                     }
-                }
 
-                var title = $('.filename', this).text();
-                wmd.load(path, title);
-            });
-
-            $('#save-button').click(function() {
-                wmd.saveFile();
-            });
-            $('#reset-button').click(function() {
-                if (!isDirty) {
-                    return;
-                }
-                var result = html.confirmChangesLost('Are you sure you want to reset?');
-                if (result) {
-                    wmd.load();
-                }
-            });
-            $('#auto-save').click(function() {
-                var isChecked = $(this).is(':checked');
-                if (isChecked) {
-                    wmd.autoSave.enable();
-                } else {
-                    wmd.autoSave.disable();
-                }
-            });
-
-            $('#file-add a').fancybox({
-                autoCenter: true,
-                maxWidth: '400px',
-                height: '60px',
-                beforeLoad: function() {
-                    if (isDirty) {
-                        var result = html.confirmChangesLost('Are you sure you want to add new file?');
-                        if (!result) {
+                    dropboxClient.client.getUserInfo(function (getUserError, userInfo) {
+                        if (getUserError) {
+                            $scope.messageBox.addError(getUserError);
                             return;
                         }
-                    }
 
-                    $('#modal-textbox-add input').val('');
-                },
-                afterLoad: function() {
-                    $('#modal-textbox-add input').focus().select();
-                }
-            });
+                        $scope.user = userInfo;
+                        $scope.messageBox.addMessage('You are logged in as <strong>' + $scope.user.name + '</strong>', false, 3000);
 
-            $wmdInput.keyup(function() {
-                isDirty = true;
-
-                wmd.preview.updatePretty();
-            });
-
-            $('#file-rename').fancybox({
-                autoCenter: true,
-                maxWidth: '400px',
-                height: '60px',
-                beforeLoad: function() {
-                    if (isDirty) {
-                        var result = html.confirmChangesLost('Are you sure you want to rename this file?');
-                        if (!result) {
-                            return false;
-                        }
-                    }
-
-                    var filePath = $wmdInput.attr('data-path');
-                    var fileName = getFileName(filePath);
-                    $('#rename-title').text(fileName);
-                    $('#modal-textbox-rename input').val(fileName);
-                },
-                afterLoad: function() {
-                    $('#modal-textbox-rename input').focus().select();
-                }
-            });
-            $('#file-delete').click(function(e) {
-                e.preventDefault();
-
-                var result = html.confirmChangesLost('Are you sure you want to delete this file?');
-                if (!result) {
-                    return;
-                }
-                wmd.loadStart();
-                html.directory.setCollapsed();
-
-                var filePath = $wmdInput.attr('data-path');
-                dropboxClient.client.delete(filePath, function(error, stat) {
-                    if (error) {
-                        html.messageBox.showError(error);
-                    } else {
-                        html.messageBox.showMessage("File moved as revision " + stat.versionTag);
-                        html.directory.load();
-                    }
-
-                    wmd.loadEnd();
-                    wmd.hide();
-                });
-            });
-
-            $wmdInput.bind('keydown.ctrl_s keydown.cmd_s keydown.alt_s', function(e) {
-                wmd.saveFile();
-                e.preventDefault();
-                return false;
-            });
-
-            var validateModalInput = function(fileName) {
-                if (!fileName) {
-                    alert('File must have a name!');
-                    return false;
-                }
-                return true;
-            };
-            $('#modal-textbox-add button').click(function() {
-                var fileName = $('#modal-textbox-add input').val();
-                var isValid = validateModalInput(fileName);
-                if (!isValid) {
-                    return;
-                }
-
-                html.directory.setCollapsed();
-                wmd.loadStart();
-
-                var path = getFilePath(fileName);
-                dropboxClient.client.writeFile(path, '', function(error, stat) {
-                    if (error) {
-                        html.messageBox.showError(error);
-                    } else {
-                        html.messageBox.showMessage("File added as revision " + stat.versionTag);
-                        html.directory.load();
-                    }
-
-                    wmd.loadEnd();
-                });
-
-                $.fancybox.close();
-            });
-
-            $('#modal-textbox-rename button').click(function() {
-                var fileName = $('#modal-textbox-rename input').val();
-                var isValid = validateModalInput(fileName);
-                if (!isValid) {
-                    return;
-                }
-
-                html.directory.setCollapsed();
-                wmd.loadStart();
-
-                var fromPath = $wmdInput.attr('data-path');
-                var toPath = getFilePath(fileName);
-                dropboxClient.client.move(fromPath, toPath, function(error, stat) {
-                    if (error) {
-                        html.messageBox.showError(error);
-                    } else {
-                        html.messageBox.showMessage("File moved as revision " + stat.versionTag);
-                        html.directory.load();
-                        wmd.load(toPath, fileName);
-                    }
-
-                    wmd.loadEnd();
-                });
-
-                $.fancybox.close();
-            });
-
-            $wmdHtml.click(function() {
-                $wmdHtml.select();
-            });
-            $wmdHtml.keydown(function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            });
-
-            $wmdHtmlToggle.click(function() {
-                var isExpanded = $(this).hasClass('expanded');
-                if (isExpanded) {
-                    wmd.html.setCollapsed();
-                } else {
-                    wmd.html.setExpanded();
-                }
-            });
-
-            $('.click-once').click(function() {
-                $(this).attr('disabled', 'disabled');
-            });
-        },
-
-        confirmChangesLost: function(customText) {
-            customText = $.trim(customText + '\n\nAll changes will be lost!');
-
-            var result = confirm(customText);
-            return result;
-        },
-
-        messageBox: {
-            initMessagebox: function() {
-                $('#message-box').on('click', '.error, .message', function() {
-                    html.messageBox.removeMessage($(this));
+                        $scope.directory.load($scope.directory.path);
+                    });
                 });
             },
-            showError: function(error) {
+
+            saveFile: function (path, content, callback) {
+                dropboxClient.client.writeFile(path, content, function (error, stat) {
+                    if (error) {
+                        $scope.messageBox.addError(error);
+                    } else {
+                        $scope.messageBox.addMessage("File saved as revision " + stat.versionTag);
+                    }
+
+                    if (typeof (callback) === 'function') {
+                        callback();
+                    }
+                });
+            }
+        };
+
+        $scope.user = {};
+        
+        $scope.messageBox = {
+            messages: [],
+            addError: function(error, timeout) {
                 error = error || {};
                 var text;
                 switch (error.status) {
-                case 401:
-                    text = '401: User token expired.';
-                    break;
-                case 404:
-                    text = '404: The file or folder you tried to access is not in your Dropbox.';
-                    break;
-                case 507:
-                    text = '507: Your Dropbox is full.';
-                    break;
-                case 503:
-                    text = '503: Try again later.';
-                    break;
-                case 400:
-                    text = '400: Bad input parameter.';
-                    break;
-                case 403:
-                    text = '403: Bad OAuth request.';
-                    break;
-                case 405:
-                    text = '405: Request method not expected.';
-                    break;
-                default:
-                    text = 'An unknown error occurred.';
+                    case 401:
+                        text = '401: User token expired.';
+                        break;
+                    case 404:
+                        text = '404: The file or folder you tried to access is not in your Dropbox.';
+                        break;
+                    case 507:
+                        text = '507: Your Dropbox is full.';
+                        break;
+                    case 503:
+                        text = '503: Try again later.';
+                        break;
+                    case 400:
+                        text = '400: Bad input parameter.';
+                        break;
+                    case 403:
+                        text = '403: Bad OAuth request.';
+                        break;
+                    case 405:
+                        text = '405: Request method not expected.';
+                        break;
+                    default:
+                        text = 'An unknown error occurred.';
                 }
 
-                html.messageBox.showMessage(text, true);
+                $scope.messageBox.addMessage(text, true, timeout);
             },
-            showMessage: function(text, isError, timeout) {
-                var errorClass = isError ? 'class="error" ' : 'class="message" ';
-                var $message = $('#message-box').append('<div ' + errorClass + 'title="Click to dismiss">' + text + '</div>');
-
+            addMessage: function (text, isError, timeout) {
+                var message = { text: text, isError: isError };
+                $scope.messageBox.messages.push(message);
+                
                 if (timeout) {
-                    setTimeout(function() {
-                        html.messageBox.removeMessage($message);
+                    setTimeout(function () {
+                        $scope.messageBox.removeMessage(message);
                     }, timeout);
                 }
             },
-            removeMessage: function($element) {
-                $element.animate({ height: '0px' }, 300, 'linear', function() {
-                    $(this).remove();
-                });
+            removeMessage: function (message) {
+                var index = $scope.messageBox.messages.indexOf(message);
+                if (index >= 0) {
+                    $('#message-box .ng-binding').eq(index).animate({ height: '0px' }, 350, 'linear', function () {
+                        $scope.messageBox.messages.splice(index, 1);
+                        $scope.$digest();
+                    });
+                }
             }
-        },
+        };
+        
+        $scope.directory = {
+            isHeaderExpanded: false,
+            isLoading: false,
+            isInSubDirectory: false,
+            folders: [],
+            files: [],
+            path: '',
+            parentPath: '',
+            
+            
+            loadParent: function () {
+                $scope.directory.load($scope.directory.parentPath);
+            },
+            load: function(folderPath) {
+                $scope.directory.isLoading = true;
+                $scope.directory.isHeaderExpanded = false;
+                $scope.directory.folders = [];
+                $scope.directory.files = [];
 
-        directory: {
-            load: function(path) {
-                path = path || $directory.attr('data-path');
-
-                var $entries = $directoryContentEntries.empty();
-
-                html.directory.loadStart();
-
-                dropboxClient.client.readdir(path, function(error, entryTitles, data, entries) {
+                $scope.directory.path = folderPath || $scope.directory.path || '/';
+                cookies.setItem('path', $scope.directory.path, 300);
+                
+                dropboxClient.client.readdir($scope.directory.path, function (error, entryTitles, data, entries) {
                     if (error) {
-                        html.messageBox.showError(error);
-
-                        html.directory.loadEnd();
+                        $scope.messageBox.addError(error);
+                        $scope.directory.isLoading = false;
+                        $scope.directory.isHeaderExpanded = true;
                         return;
                     }
 
-                    var isDirectory = path !== '/';
-                    if (isDirectory) {
-                        var parent = $directory.attr('data-parent');
-                        html.directory.addItem('..', parent, '', $entries, true);
+                    $scope.directory.isInSubDirectory = ($scope.directory.path !== '/');
+                    if ($scope.directory.isInSubDirectory) {
+                        $scope.directory.parentPath = getParentPath($scope.directory.path);
                     }
 
-                    if (!entries.length) {
-                        $entries.text('No entries found').addClass('no-entries');
-                        return;
-                    }
-
-                    entries.sort(function(a, b) {
+                    entries.sort(function (a, b) {
                         var d = (+a.isFolder) - (+b.isFolder);
                         if (d !== 0) {
                             return d;
                         }
-
                         return a.name.toLowerCase() < b.name.toLowerCase();
                     });
 
                     for (var i = entries.length - 1; i >= 0; i--) {
                         var entry = entries[i];
                         if (entry.isFolder) {
-                            html.directory.addItem(entry.name, entry.path, '', $entries, true);
+                            $scope.directory.folders.push({ text: entry.name, path: entry.path });
                         } else {
-                            html.directory.addItem(entry.name, entry.path, entry.humanSize, $entries);
+                            $scope.directory.files.push({ text: entry.name, path: entry.path, size: entry.humanSize });
                         }
                     }
 
-                    html.directory.loadEnd();
+                    $scope.directory.isLoading = false;
+                    $scope.directory.isHeaderExpanded = true;
+                    $scope.$digest();
                 });
             },
-            addItem: function(name, path, size, $entries, isDirectory) {
-                $entries = $entries || $directoryContentEntries;
+            add: function() {
+                // TODO?
+            }
+        };
+        $scope.directory.path = cookies.getItem('path') || '/';
+        $scope.directory.parentPath = getParentPath($scope.directory.path);
 
-                name = isDirectory ? '[' + name + ']' : name;
-                var directoryHtml = isDirectory ? ' data-is-directory="1"' : '';
-                var sizeHtml = size ? ' <span class="filesize">(' + size + ')</span>' : '';
-                var navClass = isDirectory ? ' nav' : '';
+        $scope.file = {
+            isDirty: false,
+            isLoading: false,
+            isSaving: false,
+            isInAddFileMode: false,
+            isInRenameFileMode: false,
 
-                $entries.append('<div class="entry clickable' + navClass + '" data-path="' + path + '" ' + directoryHtml +
-                    '><span class="filename">' + name + '</span>' +
-                    sizeHtml + ' </div><div class="clearfix"></div>');
+            path: '',
+            
+            load: function (filePath, title) {
+                $scope.file.isLoading = true;
+                
+                if ($scope.file.isDirty) {
+                    var result = $scope.file.confirmChangesLost('Are you sure you want to open another file?');
+                    if (!result) {
+                        return;
+                    }
+                }
+                
+                $scope.file.path = filePath || $scope.file.path;
+                $scope.directory.isHeaderExpanded = false;
+                
+                $scope.wmd.title = title || $scope.wmd.title;
+                $scope.wmd.content = '';
+                $scope.wmd.prettyPreview = '';
+                $scope.wmd.preview = '';
+                $scope.wmd.html = '';
+                
+                dropboxClient.client.readFile($scope.file.path, function (error, data) {
+                    if (error) {
+                        $scope.messageBox.addError(error);
+                        $scope.file.isLoading = false;
+                        return;
+                    }
+                    
+                    $scope.file.isDirty = false;
+                    $scope.wmd.content = data;
+
+                    $scope.wmd.init();
+                    
+                    $scope.file.isLoading = false;
+                    $scope.$digest();
+
+                    $('html, body').animate({
+                        scrollTop: $wmdPanel.offset().top
+                    }, 500, function () {
+                        $wmdInput.focus();
+                    });
+                });
             },
-            toggleExpand: function() {
-                var isExpanded = $directoryContentHeaderText.hasClass('expanded');
-                if (isExpanded) {
-                    html.directory.setCollapsed();
-                } else {
-                    html.directory.setExpanded();
+            save: function () {
+                $scope.file.isSaving = true;
+                dropboxClient.saveFile($scope.file.path, $scope.wmd.content, function (error) {
+                    if (error) {
+                        $scope.messageBox.addError(error);
+                    }
+                    $scope.file.isSaving = false;
+                    $scope.$digest();
+                });
+            },
+            reset: function() {
+                if (!$scope.file.isDirty) {
+                    return;
+                }
+                var result = $scope.file.confirmChangesLost('Are you sure you want to reset?');
+                if (result) {
+                    $scope.file.load();
                 }
             },
-            setExpanded: function() {
-                $directoryContentHeaderText.html('&#x25B2; Files').addClass('expanded'); // ▲
-                $directoryContent.show();
+            showAddModal: function () {
+                $scope.file.isInAddFileMode = true;
+                $('#modal-textbox-add').click();
             },
-            setCollapsed: function() {
-                $directoryContentHeaderText.html('&#x25BC; Files').removeClass('expanded'); // ▼
-                $directoryContent.hide();
+            add: function() {
+                var isValid = validateFileName($scope.file.addFilename);
+                if (!isValid) {
+                    return;
+                }
+                
+                $scope.file.isLoading = true;
+
+                var path = getFullPath($scope.directory.path, $scope.file.addFilename);
+                dropboxClient.client.writeFile(path, '', function (error, stat) {
+                    if (error) {
+                        $scope.messageBox.addError(error);
+                    } else {
+                        $scope.messageBox.addMessage('File added at "' + stat.path + '"');
+                        
+                        $scope.file.addFileText = '';
+                        $scope.directory.load();
+                    }
+
+                    $scope.file.isInAddFileMode = false;
+                    $scope.file.addFilename = '';
+                    
+                    $scope.file.isLoading = false;
+                });
             },
-
-            loadStart: function() {
-                html.directory.setCollapsed();
-                $directoryContentRefresh.hide();
-                $('#directory-content-spinner').show();
+            showRenameModal: function() {
+                $('#file-rename').click();
             },
-
-            loadEnd: function() {
-                html.directory.setExpanded();
-                $directoryContentRefresh.show();
-                $('#directory-content-spinner').hide();
-            }
-        }
-    };
-
-    var wmd = {
-        converter: null,
-        editor: null,
-
-        init: function() {
-            $wmd.show();
-
-            wmd.converter = wmd.converter || Markdown.getSanitizingConverter();
-            wmd.editor = wmd.editor || new Markdown.Editor(wmd.converter);
-            wmd.editor.run();
-            wmd.editor.refreshPreview();
-            
-            wmd.preview.updatePretty();
-
-            wmd.initPretty();
-            
-            wmd.initBoxHeights();
-        },
-
-        load: function(path, title) {
-            $wmdInput.show();
-
-            path = path || $wmdInput.attr('data-path');
-            if (title) {
-                $('#wmd-file-title').text(title);
-            }
-
-            html.directory.setCollapsed();
-            wmd.loadStart();
-            wmd.html.setCollapsed();
-            $wmdHtml.val('');
-
-            dropboxClient.client.readFile(path, function(error, data) {
-                if (error) {
-                    html.messageBox.showError(error);
-                    wmd.loadEnd();
+            rename: function () {
+                var isValid = validateFileName($scope.file.renameFilename);
+                if (!isValid) {
                     return;
                 }
 
-                isDirty = false;
+                $scope.file.isLoading = true;
 
-                $wmdInput.val(data).attr('data-path', path);
-                $wmdPreview.html('&nbsp;');
+                var fromPath = $scope.file.path;
+                var toPath = getFullPath($scope.directory.path, $scope.file.renameFilename);
+                dropboxClient.client.move(fromPath, toPath, function (error, stat) {
+                    if (error) {
+                        $scope.messageBox.addError(error);
+                    } else {
+                        $scope.messageBox.addMessage('File renamed as revision ' + stat.versionTag);
 
-                wmd.init();
+                        $scope.file.path = toPath;
+                        $scope.file.renameFilename = '';
+                        
+                        $scope.directory.load();
+                    }
 
-                wmd.loadEnd();
+                    $scope.file.cancelRename();
+                    $scope.file.isLoading = false;
+                });
+            },
+            cancelRename: function () {
+                $scope.file.isInRenameFileMode = false;
+                $scope.file.renameFilename = '';
+            },
+            remove: function() {
+                var result = $scope.file.confirmChangesLost('Are you sure you want to delete this file?');
+                if (!result) {
+                    return;
+                }
 
-                $('html, body').animate({
-                        scrollTop: $wmdPanel.offset().top
-                    }, 500, function() {
-                        $wmdInput.focus();
-                    });
-            });
-        },
+                $scope.file.isLoading = true;
+                
+                dropboxClient.client['delete']($scope.file.path, function (error, stat) {
+                    if (error) {
+                        $scope.messageBox.addError(error);
+                    } else {
+                        $scope.messageBox.addMessage('File removed');
+                        $scope.directory.load();
+                    }
 
-        loadStart: function() {
-            $wmdSpinnerArea.show();
-            $wmd.hide();
-        },
-        loadEnd: function() {
-            $wmdSpinnerArea.hide();
-            $wmd.show();
-        },
-        isHeightInit: false,
-        initBoxHeights: function() {
-            if (wmd.isHeightInit) {
-                return;
+                    $scope.file.isLoading = false;
+                });
+            },
+
+            confirmChangesLost: function (message) {
+                message = $.trim(message + '\n\nAll changes will be lost!');
+                var result = confirm(message);
+                return result;
             }
-            wmd.isHeightInit = true;
+        };
+        
+        $scope.autoSave = {
+            isActivated: false,
+            change: function () {
+                if ($scope.autoSave.isActivated) {
+                    $wmdInput.on('keyup', $scope.autoSave.startTimeout);
+                } else {
+                    $wmdInput.off('keyup', $scope.autoSave.startTimeout);
+                }
+            },
+            timeoutId: 0,
+            startTimeout: function () {
+                clearTimeout($scope.autoSave.timeoutId);
 
-            var wmdBoxHeightCss = $('.wmd-box').css('height').replace('px', '');
-            var wmdBoxHeight = parseInt(wmdBoxHeightCss, 10);
-
-            var windowHeight = $(window).height();
-            if (wmdBoxHeight > windowHeight) {
-                var boxHeight = (windowHeight - 2);
-                $('.wmd-box').height(boxHeight);
-                var buttonBarHeight = $('#wmd-button-bar').height();
-                $wmdInput.height((boxHeight - buttonBarHeight));
+                $scope.autoSave.timeoutId = setTimeout(function () {
+                    $scope.file.save();
+                }, 15000);
             }
-        },
+        };
+        
+        $scope.wmd = {
+            showHtml: false,
+            title: '',
+            content: '',
+            prettyPreview: '',
+            preview: '',
+            html: '',
+            
+            converter: null,
+            editor: null,
+            
+            init: function() {
+                $scope.wmd.converter = $scope.wmd.converter || Markdown.getSanitizingConverter();
+                $scope.wmd.editor = $scope.wmd.editor || new Markdown.Editor($scope.wmd.converter);
+                $scope.wmd.editor.run();
+                $scope.wmd.editor.refreshPreview();
 
-        initPretty: function() {
-            wmd.preview.lazyPrettify(1);
-        },
-
-        hide: function() {
-            $wmd.hide();
-        },
-
-        saveFile: function() {
-            var path = $wmdInput.attr('data-path');
-            var content = $wmdInput.val();
-
-            var $buttons = $('#wmd button, #wmd input').hide();
-            var $navigation = $('#directory, #file-rename, #file-delete').hide();
-            var $saveSpinner = $('#save-spinner').removeClass('no-display');
-
-            dropboxClient.saveFile(path, content, function() {
-                $buttons.show();
-                $navigation.show();
-                $saveSpinner.addClass('no-display');
-            });
-        },
-
-        preview: {
-            update: function() {
-                $wmdHtml.val($wmdPreview.html());
+                setTimeout(function() {
+                    $scope.wmd.updatePretty();
+                    $scope.wmd.initPretty();
+                    $scope.wmd.initBoxHeights();
+                    $wmdInput.keydown();
+                    $scope.$digest();
+                }, 500);
             },
-            setExpanded: function() {
-                $wmdInput.on('keyup', wmd.html.update);
-                wmd.html.update();
 
-                $wmdHtmlToggle.html('&#x25B2; Hide HTML').addClass('expanded'); // ▲
-                $wmdHtml.show();
-            },
-            setCollapsed: function() {
-                $wmdInput.off('keyup', wmd.html.update);
+            isHeightInit: false,
+            initBoxHeights: function() {
+                if ($scope.wmd.isHeightInit) {
+                    return;
+                }
+                $scope.wmd.isHeightInit = true;
 
-                $wmdHtmlToggle.html('&#x25BC; Show HTML').removeClass('expanded'); // ▼
-                $wmdHtml.hide();
+                var $wmdBox = $('.wmd-box');
+                var wmdBoxHeight = +$wmdBox.css('height').replace('px', '') || 0;
+                var windowHeight = $(window).height();
+                
+                if (wmdBoxHeight > windowHeight) {
+                    var boxHeight = (windowHeight - 2);
+                    $wmdBox.height(boxHeight);
+                    var buttonBarHeight = $('#wmd-button-bar').height();
+                    $wmdInput.height((boxHeight - buttonBarHeight));
+                }
             },
-            updatePretty: function() {
+            
+            toggleShowHtml: function() {
+                $scope.wmd.showHtml = !$scope.wmd.showHtml;
+            },
+            
+            initPretty: function() {
+                $scope.wmd.lazyPrettify(1);
+            },
+            updatePretty: function () {
                 $wmdPrettyPreview.html($wmdPreview.html());
 
-                wmd.preview.lazyPrettify();
+                $scope.wmd.lazyPrettify();
             },
             lazyPrettifyTimeoutId: 0,
-            lazyPrettify: function(timeout) {
-                timeout = timeout || 500;
-                
-                clearTimeout(wmd.preview.lazyPrettifyTimeoutId);
-                wmd.preview.lazyPrettifyTimeoutId = setTimeout(function() {
+            lazyPrettify: function (timeout) {
+                timeout = timeout || 3000;
+
+                clearTimeout($scope.wmd.lazyPrettifyTimeoutId);
+                $scope.wmd.lazyPrettifyTimeoutId = setTimeout(function () {
                     $('pre:not(".no-prettyprint"), code:not(".no-prettyprint")', $wmdPrettyPreview).addClass('prettyprint');
                     prettyPrint();
                 }, timeout);
             }
-        },
-
-        html: {
-            update: function() {
-                $wmdHtml.val($wmdPreview.html());
-            },
-            setExpanded: function() {
-                $wmdInput.on('keyup', wmd.html.update);
-                wmd.html.update();
-
-                $wmdHtmlToggle.html('&#x25B2; Hide HTML').addClass('expanded'); // ▲
-                $wmdHtml.show();
-            },
-            setCollapsed: function() {
-                $wmdInput.off('keyup', wmd.html.update);
-
-                $wmdHtmlToggle.html('&#x25BC; Show HTML').removeClass('expanded'); // ▼
-                $wmdHtml.hide();
-            }
-        },
-
-        autoSave: {
-            timeoutId: 0,
-            perform: function() {
-                clearTimeout(wmd.autoSave.timeoutId);
-
-                wmd.autoSave.timeoutId = setTimeout(function() {
-                    wmd.saveFile();
-                }, 15000);
-            },
-            enable: function() {
-                $wmdInput.on('keyup', wmd.autoSave.perform);
-            },
-            disable: function() {
-                $wmdInput.off('keyup', wmd.autoSave.perform);
-            }
+        };
+        
+        // Event handlers
+        $wmdInput.keyup(function () {
+            $scope.file.isDirty = true;
+            $scope.wmd.updatePretty();
+        });
+        $wmdHtml.click(function () {
+            $wmdHtml.select();
+        });
+        $wmdHtml.keydown(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+        $wmdInput.bind('keydown.ctrl_s keydown.cmd_s keydown.alt_s', function (e) {
+            $scope.file.save();
+            e.preventDefault();
+            return false;
+        });
+        
+        if ($('html').hasClass('lt-ie10')) {
+            return;
         }
+
+        //$scope.messageBox.addMessage('Friendly message here');
+        //$scope.messageBox.addError({ status: 401 });
+        //$scope.messageBox.addError();
+
+        dropboxClient.init();
+
+        window.scrollTo(0, 1);
+        setTimeout(function () {
+            if ($(document).scrollTop() < 1) {
+                window.scrollTo(0, 1);
+            }
+        }, 1000);
     };
 
-    if ($('html').hasClass('lt-ie10')) {
-        return;
-    }
-
-    //html.messageBox.showMessage('Friendly message here');
-    //html.messageBox.showError({ status: 401 });
-    //html.messageBox.showError();
-
-    //dropboxClient.directory.addItem('TestName1', 'TestPath1', '5000 GB');
-    //dropboxClient.directory.addItem('TestName2', 'TestPath2', '5000 GB');
-    //dropboxClient.directory.addItem('TestName3', 'TestPath3', '5000 GB');
-
-    html.initListeners();
-    html.messageBox.initMessagebox();
-
-    dropboxClient.init();
-
-    window.scrollTo(0, 1);
-    setTimeout(function() {
-        if ($(document).scrollTop() < 1) {
-            window.scrollTo(0, 1);
-        }
-    }, 1000);
+    return MarkdownBox;
 }(window, document));
