@@ -280,6 +280,8 @@ MarkdownBox = (function (window, document, undefined) {
                     if (error) {
                         $scope.messageBox.addError(error);
                     }
+
+                    $scope.file.isDirty = false;
                     $scope.file.isSaving = false;
                     $scope.$digest();
                 });
@@ -290,6 +292,7 @@ MarkdownBox = (function (window, document, undefined) {
                 }
                 var result = $scope.file.confirmChangesLost('Are you sure you want to reset?');
                 if (result) {
+                    $scope.file.isDirty = false;
                     $scope.file.load();
                 }
             },
@@ -384,6 +387,7 @@ MarkdownBox = (function (window, document, undefined) {
         
         $scope.autoSave = {
             isActivated: false,
+            timeout: 10000,
             change: function () {
                 if ($scope.autoSave.isActivated) {
                     $wmdInput.on('keyup', $scope.autoSave.startTimeout);
@@ -397,7 +401,7 @@ MarkdownBox = (function (window, document, undefined) {
 
                 $scope.autoSave.timeoutId = setTimeout(function () {
                     $scope.file.save();
-                }, 15000);
+                }, $scope.autoSave.timeout);
             }
         };
         
@@ -455,6 +459,7 @@ MarkdownBox = (function (window, document, undefined) {
             },
             updatePretty: function () {
                 $wmdPrettyPreview.html($wmdPreview.html());
+                $wmdHtml.val($wmdPrettyPreview.html());
 
                 $scope.wmd.lazyPrettify();
             },

@@ -191,43 +191,53 @@ textarea {
     border: 1px solid #555;
     font-size: 0.9em;
     margin: 0 auto 1em;
-    max-width: 400px;
+    max-width: 500px;
 }
 #directory-content-header {
-    background-color: #ccc;
+    background-color: #999;
     padding: 0.25em;
 }
 #directory-content-entries {
     /*font-size: 0.9em;*/
-    padding: 0.25em;
+    /*padding: 0.25em;*/
 }
 #directory-content-entries .no-files {
     background-color: #ccc;
     font-style: italic;
 }
+#directory-content-entries .entry {
+    border-bottom: 1px solid #ccc;
+    padding: 0.1em 0.25em;
+}
 #directory-content-entries .nav {
-    margin-bottom: 0.25em;
+    /*margin-bottom: 0.25em;*/
+    background-color: #eee;
 }
 #directory-content-entries .nav .filename {
     font-weight: normal;
 }
-#file-add {
-    border-top: 1px solid #555;
-    padding: 0.25em;
-    font-style: italic;
-}
-#file-rename, #file-delete {
-    font-size: 0.8em;
-}
-
 #directory .filename {
-    font-weight: bold;
+    /*font-weight: bold;*/
 }
 #directory .filesize {
     font-size: 0.75em;
     /*font-style: italic;*/
     /*float: right;*/
 }
+
+#file-add {
+    background-color: #ddd;
+    border-top: 1px solid #555;
+    padding: 0.25em;
+    font-style: italic;
+}
+#file-add input[type="text"] {
+    width: 50%;
+}
+#file-rename, #file-delete {
+    font-size: 0.8em;
+}
+
 #directory-content-refresh, #directory-content-spinner {
     /*background-position: center center;
     background-repeat: no-repeat;*/
