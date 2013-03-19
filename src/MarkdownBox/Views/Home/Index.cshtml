@@ -1,7 +1,7 @@
-﻿<div id="directory">
+﻿<div id="directory" ng-show="user.isAuthenticated">
     <div id="directory-content-header">
         <span id="directory-content-header-text" ng-class="{ true: 'clickable expanded', false: 'clickable'}[directory.isHeaderExpanded]"
-            ng-click="directory.isHeaderExpanded = !directory.isHeaderExpanded" ngCloak>
+            ng-click="directory.isHeaderExpanded = !directory.isHeaderExpanded" ng-cloak>
             <i class="icon-th-list"></i>
             <span class="label label-info">Files</span>
             <span ng-show="directory.path" class="label label-inverse">{{directory.path}}</span>
@@ -11,7 +11,7 @@
         </span>
         <span id="directory-content-spinner" ng-show="directory.isLoading">&nbsp;</span>
     </div>
-    <div id="directory-content" ng-show="directory.isHeaderExpanded" ngCloak>
+    <div id="directory-content" ng-show="directory.isHeaderExpanded" ng-cloak>
         <div id="directory-content-entries" ng-show="!directory.isLoading">
             <div ng-show="directory.isInSubDirectory" ng-click="directory.loadParent()" class="entry clickable nav">
                 <span class="filename">
@@ -38,7 +38,7 @@
 
         <div id="file-add" class="clickable" ng-show="!directory.isLoading">
             <span ng-show="!file.isInAddFileMode" ng-click="file.isInAddFileMode = true">
-                <button class="btn btn-mini">
+                <button class="btn btn-mini" ng-disabled="file.isLoading || file.isSaving">
                     <i class="icon-plus"></i> Add New File
                 </button>
             </span>
@@ -62,18 +62,18 @@
     <div>
         <span id="wmd-file-title" ng-bind="wmd.title" ng-show="!file.isInRenameFileMode"></span>
         <span id="file-rename" ng-click="file.isInRenameFileMode = true; file.renameFilename = wmd.title;"
-              ng-show="!file.isLoading && !file.isSaving && !file.isInRenameFileMode" class="btn btn-mini">
+              ng-show="!file.isInRenameFileMode" ng-disabled="file.isLoading || file.isSaving" class="btn btn-mini">
             <i class="icon-edit"></i> Rename
         </span>
         <span ng-show="file.isInRenameFileMode">
-            <input type="text" ng-model="file.renameFilename" ng-disabled="file.isSaving"/>
+            <input id="file-rename-textbox" type="text" ng-model="file.renameFilename" ng-disabled="file.isSaving"/>
             <button ng-click="file.rename()" class="btn btn-primary btn-small">
                 <i class="icon-ok"></i> Rename
             </button>
             <button ng-click="file.cancelRename()" class="btn btn-mini">Cancel</button>
         </span>
         
-        <button id="file-delete" ng-click="file.remove()" ng-show="!file.isLoading && !file.isSaving && !file.isInRenameFileMode"
+        <button id="file-delete" ng-click="file.remove()" ng-show="!file.isInRenameFileMode" ng-disabled="file.isLoading || file.isSaving"
             class="btn btn-danger btn-mini">
             <i class="icon-trash"></i> Delete
         </button>
@@ -88,12 +88,16 @@
         <i class="icon-ok-circle"></i> Save
     </button>
     <button id="reset-button" ng-click="file.reset()" ng-disabled="!file.isDirty || file.isLoading || file.isSaving"
-            class="btn btn-warning btn-small">
+            class="btn btn-danger btn-mini">
         <i class="icon-remove-circle"></i> Reset
     </button>
-
-    <input type="checkbox" name="auto-save" id="auto-save" ng-model="autoSave.isActivated" ng-change="autoSave.change()" ng-disabled="file.isLoading">
-    <label for="auto-save" ng-disabled="file.isLoading">Auto-save</label>
+    
+    <span id="auto-save-section">
+        <label for="auto-save" ng-disabled="file.isLoading">
+            <input type="checkbox" name="auto-save" id="auto-save" ng-model="autoSave.isActivated" ng-change="autoSave.change()" ng-disabled="file.isLoading">
+            Auto-save
+        </label>
+    </span>
 
     <span id="save-spinner" ng-show="file.isSaving"></span>
 
@@ -103,7 +107,7 @@
     
     <div id="wmd-html-toggle" ng-show="!file.isLoading">
         <button ng-click="wmd.toggleShowHtml()" class="btn btn-info">
-            <i class="icon-eye-open"></i> {{wmd.showHtml && 'Hide HTML' || 'Show HTML'}}
+            <i class="icon-globe"></i> {{wmd.showHtml && 'Hide HTML' || 'Show HTML'}}
         </button>
     </div>
 

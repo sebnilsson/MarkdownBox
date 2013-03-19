@@ -74,13 +74,20 @@ p code {
     background-repeat: no-repeat;
     background-color: #000;
     color: #fff;
-    font-weight: bold;
     padding: 0.75em 45px 0.75em 0;
-    text-align: right;
 }
 #top a, #top a:link, #top a:hover, #top a:active, #top a:visited {
     color: #fff;
     font-style: normal;
+}
+#logo-text {
+    float: right;
+    font-weight: bold;
+}
+#auth {
+    float: left;
+    font-size: 0.8em;
+    line-height: 2.5em;
 }
 
 #main {
@@ -135,6 +142,9 @@ p code {
 #wmd-input {
     background-color: #eee;
     width: 100%;
+}
+#auto-save-section {
+    font-size: 0.8em;
 }
 
 #save-spinner {
@@ -234,8 +244,9 @@ textarea {
 #file-add input[type="text"] {
     width: 50%;
 }
-#file-rename, #file-delete {
-    font-size: 0.8em;
+
+#file-rename-textbox {
+    width: 50%;
 }
 
 #directory-content-refresh, #directory-content-spinner {
@@ -271,10 +282,21 @@ textarea {
     border: 1px solid #555;
 }
 
+@media screen and (max-width: 235px) {
+    #auth {
+        display: none;
+    }
+}
 /* Smartphone */
 @media screen and (max-width: 320px) {
     body {
         font-size: 0.6em;
+    }
+    #login-name {
+        display: none;
+    }
+    #message-box {
+        font-size: 0.8em;
     }
     #main {
         padding: 0.75em 2px;
@@ -290,6 +312,12 @@ textarea {
 @media screen and (max-width: 540px) {
     body {
         font-size: 0.7em;
+    }
+    #login-name {
+        font-size: 0.9em;
+    }
+    #message-box {
+        font-size: 0.9em;
     }
     #main {
         padding: 0.75em 0.25em;

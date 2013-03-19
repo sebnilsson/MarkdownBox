@@ -65,27 +65,43 @@ MarkdownBox = (function (window, document, undefined) {
                     sandbox: true
                 });
                 dropboxClient.client.authDriver(new Dropbox.Drivers.Redirect({ rememberUser: true }));
-                dropboxClient.authenticate();
+                dropboxClient.autoLogin();
             },
 
+            authenticateCallback: function(error) {
+                if (error) {
+                    $scope.messageBox.addError(error);
+                    return;
+                }
+
+                if (dropboxClient.client.isAuthenticated()) {
+                    dropboxClient.populateUserInfo();
+                } else {
+                    $scope.user.isAuthenticated = false;
+                }
+            },
             authenticate: function () {
-                dropboxClient.client.authenticate(function (authenticateError) {
-                    if (authenticateError) {
-                        $scope.messageBox.addError(authenticateError);
+                dropboxClient.client.authenticate(dropboxClient.authenticateCallback);
+            },
+            
+            autoLogin: function() {
+                dropboxClient.client.authenticate({ interactive: false }, dropboxClient.authenticateCallback);
+            },
+            
+            populateUserInfo: function() {
+                dropboxClient.client.getUserInfo(function (getUserError, userInfo) {
+                    if (getUserError) {
+                        $scope.messageBox.addError(getUserError);
                         return;
                     }
 
-                    dropboxClient.client.getUserInfo(function (getUserError, userInfo) {
-                        if (getUserError) {
-                            $scope.messageBox.addError(getUserError);
-                            return;
-                        }
+                    $scope.user = userInfo;
+                    $scope.user.isAuthenticated = true;
+                    $scope.$digest();
+                    
+                    $scope.messageBox.addMessage('You are logged in as <strong>' + $scope.user.name + '</strong>', false, 3000);
 
-                        $scope.user = userInfo;
-                        $scope.messageBox.addMessage('You are logged in as <strong>' + $scope.user.name + '</strong>', false, 3000);
-
-                        $scope.directory.load($scope.directory.path);
-                    });
+                    $scope.directory.load($scope.directory.path);
                 });
             },
 
@@ -95,6 +111,13 @@ MarkdownBox = (function (window, document, undefined) {
                         $scope.messageBox.addError(error);
                     } else {
                         $scope.messageBox.addMessage("File saved as revision " + stat.versionTag);
+                        for (var i = 0, len = $scope.directory.files.length; i < len; i++) {
+                            var file = $scope.directory.files[i];
+                            if (file.path === stat.path) {
+                                file.size = stat.humanSize;
+                                break;
+                            }
+                        }
                     }
 
                     if (typeof (callback) === 'function') {
@@ -102,6 +125,15 @@ MarkdownBox = (function (window, document, undefined) {
                     }
                 });
             }
+        };
+
+        $scope.loginDropbox = function() {
+            dropboxClient.authenticate();
+        };
+        $scope.logoutDropbox = function () {
+            dropboxClient.client.signOut(function() {
+                document.location = '/';
+            });
         };
 
         $scope.user = {};
@@ -233,6 +265,13 @@ MarkdownBox = (function (window, document, undefined) {
 
             path: '',
             
+            clearFile: function() {
+                $scope.wmd.title = '';
+                $scope.wmd.content = '';
+                $scope.wmd.prettyPreview = '';
+                $scope.wmd.preview = '';
+                $scope.wmd.html = '';
+            },
             load: function (filePath, title) {
                 $scope.file.isLoading = true;
                 
@@ -245,12 +284,9 @@ MarkdownBox = (function (window, document, undefined) {
                 
                 $scope.file.path = filePath || $scope.file.path;
                 $scope.directory.isHeaderExpanded = false;
-                
+
+                $scope.file.clearFile();
                 $scope.wmd.title = title || $scope.wmd.title;
-                $scope.wmd.content = '';
-                $scope.wmd.prettyPreview = '';
-                $scope.wmd.preview = '';
-                $scope.wmd.html = '';
                 
                 dropboxClient.client.readFile($scope.file.path, function (error, data) {
                     if (error) {
@@ -261,11 +297,11 @@ MarkdownBox = (function (window, document, undefined) {
                     
                     $scope.file.isDirty = false;
                     $scope.wmd.content = data;
-
-                    $scope.wmd.init();
                     
                     $scope.file.isLoading = false;
                     $scope.$digest();
+
+                    $scope.wmd.init();
 
                     $('html, body').animate({
                         scrollTop: $wmdPanel.offset().top
@@ -325,9 +361,6 @@ MarkdownBox = (function (window, document, undefined) {
                     $scope.file.isLoading = false;
                 });
             },
-            showRenameModal: function() {
-                $('#file-rename').click();
-            },
             rename: function () {
                 var isValid = validateFileName($scope.file.renameFilename);
                 if (!isValid) {
@@ -344,6 +377,7 @@ MarkdownBox = (function (window, document, undefined) {
                     } else {
                         $scope.messageBox.addMessage('File renamed as revision ' + stat.versionTag);
 
+                        $scope.wmd.title = $scope.file.renameFilename;
                         $scope.file.path = toPath;
                         $scope.file.renameFilename = '';
                         
@@ -374,10 +408,11 @@ MarkdownBox = (function (window, document, undefined) {
                         $scope.directory.load();
                     }
 
+                    $scope.file.clearFile();
                     $scope.file.isLoading = false;
+                    $scope.$digest();
                 });
             },
-
             confirmChangesLost: function (message) {
                 message = $.trim(message + '\n\nAll changes will be lost!');
                 var result = confirm(message);

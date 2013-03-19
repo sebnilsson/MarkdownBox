@@ -62,11 +62,25 @@
     
     <div id="container">
         <header id="top">
-            <a href="/" class="btn btn-inverse">MarkdownBox</a>
+            <div id="auth" ng-cloak>
+                <button ng-show="user.isAuthenticated === false" ng-click="loginDropbox()" class="btn btn-small">
+                    <i class="icon-user"></i> Login to Dropbox
+                </button>
+
+                <span id="login-name" ng-show="user.isAuthenticated">{{user.name}}</span>
+                <button ng-show="user.isAuthenticated" ng-click="logoutDropbox()" class="btn btn-mini">
+                    <i class="icon-off"></i> Logout
+                </button>
+            </div>
+
+            <a href="/" id="logo-text" class="btn btn-inverse">MarkdownBox</a>
+            <div class="clearfix"></div>
         </header>
 
         <div id="main">
-            @RenderBody()
+            <div id="main-content" ng-cloak>
+                @RenderBody()
+            </div>
         </div>
 
         <footer id="footer"><a href="http://sebnilsson.com">Copyright &#169; @DateTime.Today.Year Sebastian Nilsson</a></footer>
