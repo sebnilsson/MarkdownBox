@@ -11,26 +11,6 @@
 MarkdownBox = (function (window, document, undefined) {
     'use strict';
 
-    var cookies = {
-        setItem: function(name, value, days) {
-            var date = new Date();
-            date.setDate(date.getDate() + days);
-            var cookieValue = escape(value) + ((days == null) ? '' : '; expires=' + date.toUTCString());
-            document.cookie = name + "=" + cookieValue;
-        },
-        getItem: function(name) {
-            var i, key, value, cookieList = document.cookie.split(";");
-            for (i = 0; i < cookieList.length; i++) {
-                key = cookieList[i].substr(0, cookieList[i].indexOf("="));
-                value = cookieList[i].substr(cookieList[i].indexOf("=") + 1);
-                key = key.replace(/^\s+|\s+$/g, "");
-                if (key == name) {
-                    return unescape(value);
-                }
-            }
-        }
-    };
-
     var validateFileName = function (fileName) {
         if (!fileName) {
             alert('File must have a name!');
@@ -48,7 +28,7 @@ MarkdownBox = (function (window, document, undefined) {
         return fullPath;
     };
 
-    var MarkdownBox = function ($scope) {
+    var MarkdownBox = function ($scope, $location) {
         var $wmdInput = $('#wmd-input'),
             $wmdPanel = $('#wmd-panel'),
             $wmdPreview = $('#wmd-preview'),
@@ -212,7 +192,8 @@ MarkdownBox = (function (window, document, undefined) {
                 $scope.directory.files = [];
 
                 $scope.directory.path = folderPath || $scope.directory.path || '/';
-                cookies.setItem('path', $scope.directory.path, 300);
+
+                $location.path($scope.directory.path);
                 
                 dropboxClient.client.readdir($scope.directory.path, function (error, entryTitles, data, entries) {
                     if (error) {
@@ -253,7 +234,7 @@ MarkdownBox = (function (window, document, undefined) {
                 // TODO?
             }
         };
-        $scope.directory.path = cookies.getItem('path') || '/';
+        $scope.directory.path = $location.path() || '/';
         $scope.directory.parentPath = getParentPath($scope.directory.path);
 
         $scope.file = {
@@ -549,3 +530,5 @@ MarkdownBox = (function (window, document, undefined) {
 
     return MarkdownBox;
 }(window, document));
+
+MarkdownBox.$inject = ['$scope', '$location'];
