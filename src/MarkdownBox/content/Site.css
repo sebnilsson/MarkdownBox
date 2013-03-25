@@ -281,6 +281,9 @@ textarea {
 #user-logout {
     border: 1px solid #555;
 }
+#last-save {
+    font-size: 0.8em;
+}
 
 @media screen and (max-width: 235px) {
     #auth {

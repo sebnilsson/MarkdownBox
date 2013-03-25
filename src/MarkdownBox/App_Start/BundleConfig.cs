@@ -33,7 +33,14 @@ namespace MarkdownBox
                 .Add("~/libraries/add2home/add2home.js")
                 .Add("~/libraries/jquery.hotkeys.js")
                 //.Add("~/Libraries/bootstrap/js/bootstrap.js")
-                .Add("~/Content/Site.js")
+                //.Add("~/Content/Site.js")
+
+                .Add("~/content/App.js")
+                .Add("~/content/Modules/DropboxController.js")
+                .Add("~/content/Controllers/AuthController.js")
+                .Add("~/content/Controllers/IOController.js")
+                .Add("~/content/Controllers/MessageController.js")
+                .Add("~/content/Controllers/WmdController.js")
                 .AsCached("bundled-site", "~/assets/js/bundled-site.js");
         }
     }

@@ -1,115 +1,126 @@
-﻿<div id="directory" ng-show="user.isAuthenticated">
-    <div id="directory-content-header">
-        <span id="directory-content-header-text" ng-class="{ true: 'clickable expanded', false: 'clickable'}[directory.isHeaderExpanded]"
-            ng-click="directory.isHeaderExpanded = !directory.isHeaderExpanded" ng-cloak>
-            <i class="icon-th-list"></i>
-            <span class="label label-info">Files</span>
-            <span ng-show="directory.path" class="label label-inverse">{{directory.path}}</span>
-        </span>
-        <span id="directory-content-refresh" ng-click="directory.load()" ng-show="!directory.isLoading" class="clickable">
-            <li class="icon-refresh" title="Refresh"></li>
-        </span>
-        <span id="directory-content-spinner" ng-show="directory.isLoading">&nbsp;</span>
-    </div>
-    <div id="directory-content" ng-show="directory.isHeaderExpanded" ng-cloak>
-        <div id="directory-content-entries" ng-show="!directory.isLoading">
-            <div ng-show="directory.isInSubDirectory" ng-click="directory.loadParent()" class="entry clickable nav">
-                <span class="filename">
-                    <i class="icon-folder-open"></i> [..]
-                </span>
-                <div class="clearfix"></div>
-            </div>
-            <div ng-repeat="folder in directory.folders" ng-click="directory.load(folder.path)" class="entry clickable nav">
-                <span class="filename">
-                    <i class="icon-folder-close"></i> [{{folder.text}}]
-                </span>
-                <div class="clearfix"></div>
-            </div>
-            <div ng-repeat="directoryFile in directory.files" ng-click="file.load(directoryFile.path, directoryFile.text)" class="entry clickable file">
-                <span class="filename">
-                    <i class="icon-file"></i> {{directoryFile.text}}
-                </span>
-                <span class="filesize label label-inverse">({{directoryFile.size}})</span>
-                <div class="clearfix"></div>
-            </div>
-
-            <div ng-show="!directory.folders.length && !directory.files.length" class="no-files">No files found</div>
-        </div>
-
-        <div id="file-add" class="clickable" ng-show="!directory.isLoading">
-            <span ng-show="!file.isInAddFileMode" ng-click="file.isInAddFileMode = true">
-                <button class="btn btn-mini" ng-disabled="file.isLoading || file.isSaving">
-                    <i class="icon-plus"></i> Add New File
-                </button>
+﻿<div ng-show="isUserAuthenticated" ng-controller="IOController">
+    <div id="directory">
+        <div id="directory-content-header">
+            <span id="directory-content-header-text" ng-class="{ true: 'clickable expanded', false: 'clickable'}[directory.isHeaderExpanded]"
+                  ng-click="directory.isHeaderExpanded = !directory.isHeaderExpanded" ng-cloak>
+                <i class="icon-th-list"></i>
+                <span class="label label-info">Files</span>
+                <span ng-show="directory.path" class="label label-inverse">{{directory.path}}</span>
             </span>
+            <span id="directory-content-refresh" ng-click="directory.load()" ng-show="!isDirectoryLoading" class="clickable">
+                <li class="icon-refresh" title="Refresh"></li>
+            </span>
+            <span id="directory-content-spinner" ng-show="isDirectoryLoading">&nbsp;</span>
+        </div>
+        <div id="directory-content" ng-show="directory.isHeaderExpanded" ng-cloak>
+            <div id="directory-content-entries" ng-show="!isDirectoryLoading">
+                <div ng-show="directory.isInSubDirectory" ng-click="directory.loadParent()" class="entry clickable nav">
+                    <span class="filename">
+                        <i class="icon-folder-open"></i> [..]
+                    </span>
+                    <div class="clearfix"></div>
+                </div>
+                <div ng-repeat="folder in directory.folders" ng-click="directory.load(folder.path)" class="entry clickable nav">
+                    <span class="filename">
+                        <i class="icon-folder-close"></i> [{{folder.text}}]
+                    </span>
+                    <div class="clearfix"></div>
+                </div>
+                <div ng-repeat="directoryFile in directory.files" ng-click="file.load(directoryFile.path, directoryFile.text)" class="entry clickable file">
+                    <span class="filename">
+                        <i class="icon-file"></i> {{directoryFile.text}}
+                    </span>
+                    <span class="filesize label label-inverse">({{directoryFile.size}})</span>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div ng-show="!directory.folders.length && !directory.files.length" class="no-files">No files found</div>
+            </div>
+
+            <div id="file-add" class="clickable" ng-show="!isDirectoryLoading">
+                <span ng-show="!file.isInAddFileMode" ng-click="file.isInAddFileMode = true">
+                    <button class="btn btn-mini" ng-disabled="isFileLoading">
+                        <i class="icon-plus"></i> Add New File
+                    </button>
+                </span>
             
-            <span ng-show="file.isInAddFileMode">
-                <input type="text" ng-model="file.addFilename" />
-                <button ng-click="file.add()" class="btn btn-primary btn-small">
-                    <i class="icon-ok"></i> Add
-                </button>
-                <button ng-click="file.isInAddFileMode = false" class="btn btn-mini">Cancel</button>
-            </span>
+                <span ng-show="file.isInAddFileMode">
+                    <input type="text" ng-model="file.addFilename" />
+                    <button ng-click="file.add()" class="btn btn-primary btn-small">
+                        <i class="icon-ok"></i> Add
+                    </button>
+                    <button ng-click="file.cancelAdd()" class="btn btn-mini">Cancel</button>
+                </span>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="wmd-spinner-area" ng-show="file.isLoading">
-    <span id="wmd-spinner">&nbsp;</span>
-</div>
-
-<div id="wmd" ng-show="wmd.title">
-    <div>
-        <span id="wmd-file-title" ng-bind="wmd.title" ng-show="!file.isInRenameFileMode"></span>
-        <span id="file-rename" ng-click="file.isInRenameFileMode = true; file.renameFilename = wmd.title;"
-              ng-show="!file.isInRenameFileMode" ng-disabled="file.isLoading || file.isSaving" class="btn btn-mini">
+    <div id="title" ng-show="fileTitle">
+        <span id="wmd-file-title" ng-bind="fileTitle" ng-show="!file.isInRenameFileMode"></span>
+        <span id="file-rename" ng-click="file.isInRenameFileMode = true; file.renameFilename = fileTitle;"
+                ng-show="!file.isInRenameFileMode" ng-disabled="isFileLoading" class="btn btn-mini">
             <i class="icon-edit"></i> Rename
         </span>
         <span ng-show="file.isInRenameFileMode">
-            <input id="file-rename-textbox" type="text" ng-model="file.renameFilename" ng-disabled="file.isSaving"/>
+            <input id="file-rename-textbox" type="text" ng-model="file.renameFilename" ng-disabled="isFileLoading"/>
             <button ng-click="file.rename()" class="btn btn-primary btn-small">
                 <i class="icon-ok"></i> Rename
             </button>
             <button ng-click="file.cancelRename()" class="btn btn-mini">Cancel</button>
         </span>
         
-        <button id="file-delete" ng-click="file.remove()" ng-show="!file.isInRenameFileMode" ng-disabled="file.isLoading || file.isSaving"
-            class="btn btn-danger btn-mini">
+        <button id="file-delete" ng-click="file.remove()" ng-show="!file.isInRenameFileMode" ng-disabled="isFileLoading"
+                class="btn btn-danger btn-mini">
             <i class="icon-trash"></i> Delete
         </button>
     </div>
-    <div id="wmd-panel">
-        <div id="wmd-button-bar"></div>
-        <textarea id="wmd-input" ng-model="wmd.content" ng-disabled="file.isSaving" ng-show="!file.isLoading"></textarea>
-    </div>
-    
-    <button id="save-button" ng-click="file.save()" ng-disabled="file.isLoading || file.isSaving"
-            class="btn btn-primary">
-        <i class="icon-ok-circle"></i> Save
-    </button>
-    <button id="reset-button" ng-click="file.reset()" ng-disabled="!file.isDirty || file.isLoading || file.isSaving"
-            class="btn btn-danger btn-mini">
-        <i class="icon-remove-circle"></i> Reset
-    </button>
-    
-    <span id="auto-save-section">
-        <label for="auto-save" ng-disabled="file.isLoading">
-            <input type="checkbox" name="auto-save" id="auto-save" ng-model="autoSave.isActivated" ng-change="autoSave.change()" ng-disabled="file.isLoading">
-            Auto-save
-        </label>
-    </span>
+</div>
 
-    <span id="save-spinner" ng-show="file.isSaving"></span>
-
-    <div id="wmd-preview" ng-model="wmd.preview" class="no-display wmd-preview">&nbsp;</div>
-
-    <div id="wmd-pretty-preview" ng-model="wmd.prettyPreview" ng-show="!file.isLoading" class="wmd-preview wmd-box">&nbsp;</div>
-    
-    <div id="wmd-html-toggle" ng-show="!file.isLoading">
-        <button ng-click="wmd.toggleShowHtml()" class="btn btn-info">
-            <i class="icon-globe"></i> {{wmd.showHtml && 'Hide HTML' || 'Show HTML'}}
-        </button>
+<div ng-controller="WmdController">
+    <div id="wmd-spinner-area" ng-show="isFileLoading && !wmd.isSaving">
+        <span id="wmd-spinner">&nbsp;</span>
     </div>
 
-    <textarea id="wmd-html" ng-model="wmd.html" ng-show="wmd.showHtml" class="wmd-box"></textarea>
+    <div id="wmd" ng-show="fileTitle">
+        <div id="wmd-panel">
+            <div id="wmd-button-bar"></div>
+            <textarea id="wmd-input" ng-model="wmd.content" ng-disabled="isFileLoading || wmd.isSaving"></textarea>
+        </div>
+        
+        <div>
+            <button id="save-button" ng-click="wmd.save()" ng-disabled="isFileLoading || wmd.isSaving"
+                    class="btn btn-primary">
+                <i class="icon-ok-circle"></i> Save
+            </button>
+            <button id="reset-button" ng-click="wmd.reset()" ng-disabled="!isFileDirty || isFileLoading || wmd.isSaving"
+                    class="btn btn-warning btn-mini">
+                <i class="icon-remove-circle"></i> Reset
+            </button>
+    
+            <span id="auto-save-section">
+                <label for="auto-save" ng-disabled="isFileLoading || wmd.isSaving">
+                    <input type="checkbox" name="auto-save" id="auto-save" ng-model="autoSave.isActivated" ng-change="autoSave.change()" ng-disabled="isFileLoading">
+                    Auto-save
+                </label>
+            </span>
+
+            <span id="save-spinner" ng-show="wmd.isSaving"></span>
+        </div>
+        
+        <div id="last-save" ng-show="lastSave">
+            <strong>Last save:</strong> {{lastSave | date:'yyyy-MM-dd HH:mm:ss'}}
+        </div>
+
+        <div id="wmd-preview" ng-model="wmd.preview" class="no-display wmd-preview">&nbsp;</div>
+
+        <div id="wmd-pretty-preview" ng-model="wmd.prettyPreview" class="wmd-preview wmd-box">&nbsp;</div>
+    
+        <div id="wmd-html-toggle">
+            <button ng-click="wmd.toggleShowHtml()" class="btn btn-info">
+                <i class="icon-globe"></i> {{wmd.showHtml && 'Hide HTML' || 'Show HTML'}}
+            </button>
+        </div>
+
+        <textarea id="wmd-html" ng-model="wmd.html" ng-show="wmd.showHtml" class="wmd-box"></textarea>
+    </div>
 </div>
