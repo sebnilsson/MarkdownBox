@@ -1,7 +1,7 @@
-﻿/// <reference path="~/Libraries/angular-1.1.3.min.js"/>
-/// <reference path="~/Libraries/dropbox.0.9.1.min.js"/>
+﻿/// <reference path="~/Libraries/angular-1.0.5.min.js"/>
+/// <reference path="~/Libraries/dropbox.0.9.2.min.js"/>
 
-markdownBoxModule.factory('dropboxClient', ['$rootScope', function ($rootScope) {
+MarkdownBox.factory('dropboxClient', ['$rootScope', function ($rootScope) {
     var dropboxClient = {
         encodedKey: 'kWWFk4v8E0A=|eLTWCRy1RDt8sJbVCXHYdHGAPrMWpBaGwgLkl6oPQg==',
         client: null,
@@ -80,13 +80,13 @@ markdownBoxModule.factory('dropboxClient', ['$rootScope', function ($rootScope) 
         loadFile: function (path, callback) {
             $rootScope.$broadcast('file-load-start');
             
-            dropboxClient.client.readFile(path, function (error, data) {
+            dropboxClient.client.readFile(path, function (error, title, data) {
                 $rootScope.handleError(error, function () {
                     if (typeof (callback) === 'function') {
                         callback();
                     }
                     
-                    $rootScope.$broadcast('file-load-success', data);
+                    $rootScope.$broadcast('file-load-success', title);
                 },
                 function () {
                     $rootScope.$broadcast('file-load-end');

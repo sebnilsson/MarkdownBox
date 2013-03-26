@@ -1,7 +1,8 @@
-﻿/// <reference path="~/Libraries/pagedown/Markdown.Converter.js"/>
+﻿/// <reference path="~/Libraries/google-prettify/prettify.js"/>
+/// <reference path="~/Libraries/jquery.hotkeys.js"/>
+/// <reference path="~/Libraries/pagedown/Markdown.Converter.js"/>
 /// <reference path="~/Libraries/pagedown/Markdown.Editor.js"/>
 /// <reference path="~/Libraries/pagedown/Markdown.Sanitizer.js"/>
-/// <reference path="~/Libraries/google-prettify/prettify.js"/>
 
 var WmdController = function ($scope, $rootScope) {
     var $wmdInput = $('#wmd-input'),
@@ -51,6 +52,8 @@ var WmdController = function ($scope, $rootScope) {
         editor: null,
 
         init: function () {
+            $scope.$digest();
+
             wmd.converter = wmd.converter || Markdown.getSanitizingConverter();
             wmd.editor = wmd.editor || new Markdown.Editor(wmd.converter);
             wmd.editor.run();
@@ -73,7 +76,7 @@ var WmdController = function ($scope, $rootScope) {
             $scope.wmd.content = '';
             $scope.wmd.prettyPreview = '';
             $scope.wmd.preview = '';
-            $scope.wmd.html = '';
+            $scope.$digest();
         },
 
         isHeightInit: false,
@@ -100,7 +103,8 @@ var WmdController = function ($scope, $rootScope) {
         },
         updatePretty: function () {
             $wmdPrettyPreview.html($wmdPreview.html());
-            $wmdHtml.val($wmdPrettyPreview.html());
+
+            $wmdPreview.trigger('preview-change');
 
             wmd.lazyPrettify();
         },
@@ -128,27 +132,6 @@ var WmdController = function ($scope, $rootScope) {
         }
     };
     
-    $scope.$on('app-init', function () {
-        // Event handlers
-        $wmdInput.keyup(function () {
-            $rootScope.$broadcast('file-content-change');
-        });
-        $wmdHtml.click(function () {
-            $rootScope.$wmdHtml.select();
-        });
-        $wmdHtml.keydown(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        });
-        $wmdInput.bind('keydown.ctrl_s keydown.cmd_s keydown.alt_s', function (e) {
-            $scope.wmd.save();
-            
-            e.preventDefault();
-            return false;
-        });
-    });
-    
     $scope.$on('file-content-change', function () {
         wmd.updatePretty();
     });
@@ -163,6 +146,7 @@ var WmdController = function ($scope, $rootScope) {
     });
     $scope.$on('file-load-success', function (e, content) {
         $scope.wmd.content = content;
+        
         wmd.init();
         
         $('html, body').animate({
@@ -170,6 +154,31 @@ var WmdController = function ($scope, $rootScope) {
         }, 500, function () {
             $wmdInput.focus();
         });
+    });
+
+    var htmlEncode = function(html) {
+        return $('<div/>').text(html).html();
+    };
+    
+    // Event handlers
+    $wmdInput.keyup(function () {
+        $rootScope.$broadcast('file-content-change');
+    });
+    $wmdInput.bind('keydown.ctrl_s keydown.cmd_s keydown.alt_s', function (e) {
+        $scope.wmd.save();
+
+        e.preventDefault();
+        return false;
+    });
+    
+    var htmlUpdateTimeoutId = 0;
+    $wmdPreview.on('preview-change', function () {
+        clearTimeout(htmlUpdateTimeoutId);
+        var preview = this;
+        htmlUpdateTimeoutId = setTimeout(function () {
+            var previewHtml = htmlEncode($(preview).html());
+            $wmdHtml.html(previewHtml);
+        }, 500);
     });
 };
 

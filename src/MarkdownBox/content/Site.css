@@ -40,6 +40,16 @@ p code {
     padding: 0 0.25em;
 }
 
+textarea {
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
+}
+
+.clickable {
+    cursor: pointer;
+    color: #00e;
+}
+
 #message-box {
     width: 100%;
 }
@@ -134,15 +144,43 @@ p code {
     overflow: hidden;
 }
 
-#wmd-input, #wmd-pretty-preview, #wmd-html {
+.wmd-box {
     font-size: 0.9em;
     height: 400px;
+
+    -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
+    border: 1px solid #555;
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    overflow: auto;
+}
+div.wmd-box {
+    padding: 0.1em;
+    width: 99.5%;
+}
+textarea.wmd-box {
+    width: 100%;
 }
 
 #wmd-input {
     background-color: #eee;
-    width: 100%;
 }
+#wmd-pretty-preview {
+    padding: 0.25em;
+    width: 99%;
+}
+#wmd-pretty-preview > p:first-of-type {
+    margin-top: 0.25em;
+}
+#wmd-pretty-preview > p:last-of-type {
+    margin-bottom: 0.25em;
+}
+#wmd-html {
+    background-color: #ccc;
+}
+
 #auto-save-section {
     font-size: 0.8em;
 }
@@ -157,44 +195,6 @@ p code {
 }
 #save-spinner.no-display {
     display: none;
-}
-
-#wmd-pretty-preview {
-    border: 1px solid #555;
-
-    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
-
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
-
-    overflow: auto;
-    padding: 0.25em;
-    width: 99%;
-}
-#wmd-pretty-preview > p:first-of-type {
-    margin-top: 0.25em;
-}
-#wmd-pretty-preview > p:last-of-type {
-    margin-bottom: 0.25em;
-}
-
-#wmd-html {
-    background-color: #ccc;
-    width: 100%;
-}
-
-textarea {
-    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
-    
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
-    
-    -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
-}
-
-.clickable {
-    cursor: pointer;
-    color: #00e;
 }
 
 #directory {
@@ -304,11 +304,8 @@ textarea {
     #main {
         padding: 0.75em 2px;
     }
-    #wmd-pretty-preview {
+    div.wmd-box {
         width: 97%;
-    }
-    #wmd-input, #wmd-html {
-        width: 99%;
     }
 }
 /* Low-res */
@@ -325,7 +322,11 @@ textarea {
     #main {
         padding: 0.75em 0.25em;
     }
-    #wmd-pretty-preview {
+    
+    textarea.wmd-box {
+        width: 99.3%;
+    }
+    div.wmd-box {
         width: 98%;
     }
 }

@@ -1,5 +1,4 @@
-﻿/// <reference path="~/Libraries/angular-1.1.3.min.js"/>
-/// <reference path="~/Libraries/jquery.hotkeys.js"/>
+﻿/// <reference path="~/Libraries/angular-1.0.5.min.js"/>
 
 var IOController = function ($scope, $rootScope, $location) {
     var getFullPath = function (directoryPath, path) {
@@ -46,8 +45,8 @@ var IOController = function ($scope, $rootScope, $location) {
             $scope.directory.isHeaderExpanded = originalHeaderState;
         }
     };
-    $scope.directory.path = $location.path() || '/';
-    $scope.directory.parentPath = getParentPath($scope.directory.path);
+    $rootScope.directoryPath = $location.path() || '/';
+    $rootScope.directoryParentPath = getParentPath($rootScope.directoryPath);
 
     $scope.file = {
         load: function (filePath, title) {
@@ -102,11 +101,11 @@ var IOController = function ($scope, $rootScope, $location) {
     };
 
     $scope.$on('auth-login-success', function () {
-        $scope.directory.load(directory.path);
+        $scope.directory.load($rootScope.directoryPath);
     });
 
     $scope.$on('file-add-success', function (e, stat) {
-        $rootScope.$broadcast('message', 'File added at "' + stat.path + '"');
+        $rootScope.message('File added at "' + stat.path + '"', 5000);
 
         $scope.file.cancelAdd();
 
@@ -121,15 +120,16 @@ var IOController = function ($scope, $rootScope, $location) {
         $scope.directory.load();
     });
     $scope.$on('file-remove-success', function () {
-        $rootScope.$broadcast('message', 'File removed');
+        $rootScope.message('File removed', 5000);
 
         $scope.directory.load();
         $scope.directory.isHeaderExpanded = true;
     });
     $scope.$on('file-rename-success', function (e, toPath, stat) {
-        $rootScope.$broadcast('message', 'File renamed as revision ' + stat.versionTag);
+        $rootScope.message('File renamed as revision ' + stat.versionTag, 5000);
 
-        $scope.$broadcast('file-path-change', toPath);
+        $rootScope.$broadcast('file-path-change', toPath);
+        
         $scope.file.cancelRename();
 
         $scope.directory.load();
@@ -149,7 +149,7 @@ var IOController = function ($scope, $rootScope, $location) {
         file.load();
     });
     $scope.$on('file-save-success', function (e, stat) {
-        $rootScope.$broadcast('message', 'File saved as revision ' + stat.versionTag);
+        $rootScope.message('File saved as revision ' + stat.versionTag, 3000);
 
         $rootScope.isFileDirty = false;
         $rootScope.lastSave = stat.modifiedAt;
@@ -198,11 +198,9 @@ var IOController = function ($scope, $rootScope, $location) {
     });
     $scope.$on('directory-load-start', function () {
         $rootScope.isDirectoryLoading = true;
-        //$scope.directory.isHeaderExpanded = false;
     });
     $scope.$on('directory-load-end', function () {
         $rootScope.isDirectoryLoading = false;
-        //$scope.directory.isHeaderExpanded = !ignoreExpandHeader;
     });
 };
 

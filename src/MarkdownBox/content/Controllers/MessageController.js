@@ -1,7 +1,7 @@
 ﻿/// <reference path="~/Libraries/jquery-1.9.1.min.js"/>
-/// <reference path="~/Libraries/angular-1.1.3.min.js"/>
+/// <reference path="~/Libraries/angular-1.0.5.min.js"/>
 
-var MessageController = function ($scope, $rootScope) {
+var MessageController = function ($scope) {
     $scope.messages = [];
     $scope.removeMessage = function(message) {
         removeMessage(message);
@@ -59,10 +59,10 @@ var MessageController = function ($scope, $rootScope) {
         }
     };
 
-    $rootScope.$on('message', function (e, text, timeout) {
+    $scope.$on('message', function (e, text, timeout) {
         addMessage(text, false, timeout);
     });
-    $rootScope.$on('error', function (e, error, timeout) {
+    $scope.$on('error', function (e, error, timeout) {
         addError(error, timeout);
     });
 };

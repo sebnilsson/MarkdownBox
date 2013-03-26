@@ -20,7 +20,7 @@
         $scope.user = userInfo;
         $scope.$digest();
 
-        $rootScope.$broadcast('message', 'You are logged in as <strong>' + $scope.user.name + '</strong>', 3000);
+        $rootScope.message('You are logged in as <strong>' + $scope.user.name + '</strong>', 3000);
     });
 };
 

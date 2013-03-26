@@ -5,7 +5,7 @@
                   ng-click="directory.isHeaderExpanded = !directory.isHeaderExpanded" ng-cloak>
                 <i class="icon-th-list"></i>
                 <span class="label label-info">Files</span>
-                <span ng-show="directory.path" class="label label-inverse">{{directory.path}}</span>
+                <span ng-show="directoryPath" class="label label-inverse">{{directory.path}}</span>
             </span>
             <span id="directory-content-refresh" ng-click="directory.load()" ng-show="!isDirectoryLoading" class="clickable">
                 <li class="icon-refresh" title="Refresh"></li>
@@ -84,7 +84,7 @@
     <div id="wmd" ng-show="fileTitle">
         <div id="wmd-panel">
             <div id="wmd-button-bar"></div>
-            <textarea id="wmd-input" ng-model="wmd.content" ng-disabled="isFileLoading || wmd.isSaving"></textarea>
+            <textarea id="wmd-input" class="wmd-box" ng-model="wmd.content" ng-disabled="isFileLoading || wmd.isSaving"></textarea>
         </div>
         
         <div>
@@ -121,6 +121,6 @@
             </button>
         </div>
 
-        <textarea id="wmd-html" ng-model="wmd.html" ng-show="wmd.showHtml" class="wmd-box"></textarea>
+        <div id="wmd-html" class="wmd-box" ng-show="wmd.showHtml"></div>
     </div>
 </div>
